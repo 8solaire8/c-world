@@ -20,6 +20,4 @@ void ArenaFree(Arena* a);
 void ArenaPrint(Arena* a);
 
 
-
-
 #endif

@@ -8,11 +8,6 @@ PageAlloc(size_t size)
     return VirtualAlloc(NULL, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 }
 
-static void*
-PageReAlloc(void* ptr, size_t oldSize, size_t newSize)
-{
-}
-
 static void 
 PageFree(void* ptr, size_t size)
 {
@@ -29,12 +24,6 @@ PageAlloc(size_t size)
     return mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 }
 
-static void*
-PageReAlloc(void* ptr, size_t oldSize, size_t newSize)
-{
-    a->data = mremap(a->data, original_size, a->size, MREMAP_MAYMOVE);
-}
-
 static void 
 PageFree(void* ptr, size_t size) 
 {
@@ -46,6 +35,7 @@ PageFree(void* ptr, size_t size)
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <assert.h>
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
@@ -67,14 +57,7 @@ void ArenaCreate(Arena* a, size_t size) {
 }
 
 void* ArenaAlloc(Arena* a, size_t size ) { 
-    if(a->ptr + size > a->size) {
-        size_t original_size = a->size;
-        while ( a->ptr + size > a->size ) {
-            a->size *= 2;
-        }
-        a->size = round_up_to_page(a->size);
-        a->data = PageReAlloc(a->data, original_size, a->size);
-    }
+    assert(a->ptr + size < a->size);
     void* ret = a->data + a->ptr;
     a->ptr += size;
     return ret;

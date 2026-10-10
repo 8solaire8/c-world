@@ -2,7 +2,17 @@
 #include "cw.h"
 
 
+void TestArenaOverflow() {
+    Arena a = {0};
+
+    ArenaCreate(&a, 3);
+
+    int* ar = ArenaAlloc(&a, 10000);
+}
+
+
 int main(i32 argc, char* argv[]){
+
     
     Arena a = {0};
     
