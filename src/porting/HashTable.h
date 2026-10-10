@@ -9,15 +9,11 @@
 #include <assert.h>
 
 
-typedef uint32_t u32;
-typedef uint32_t u64;
-typedef int64_t i64;
-typedef int32_t i32;
-typedef char Byte;
+#include "types.h"
 
 #define freeHashTable(ptr) do {   \
-    _freeHashTable(ptr);      \
-    (ptr) = NULL;            \
+    _freeHashTable(ptr);          \
+    (ptr) = NULL;                 \
     } while(0);                  
 
 typedef struct hashItem_s {

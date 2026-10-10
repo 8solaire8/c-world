@@ -1,3 +1,6 @@
+
+#ifndef _WIN32
+
 #include <stdio.h>
 #include <X11/Xlib.h>
 #include <stdlib.h>
@@ -143,3 +146,5 @@ int main(int argc, char* argv[]){
 
     return EXIT_SUCCESS;
 }
+
+#endif

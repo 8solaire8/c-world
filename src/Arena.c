@@ -1,31 +1,69 @@
+
+#ifdef _WIN32
+#include <windows.h>
+
+static void* 
+PageAlloc(size_t size)
+{
+    return VirtualAlloc(NULL, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+}
+
+static void*
+PageReAlloc(void* ptr, size_t oldSize, size_t newSize)
+{
+}
+
+static void 
+PageFree(void* ptr, size_t size)
+{
+    VirtualFree(ptr, size, MEM_RESERVE);
+}
+
+#else
 #define _GNU_SOURCE
-#include <stdio.h>
 #include <sys/mman.h>
+
+static void* 
+PageAlloc(size_t size)
+{
+    return mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+}
+
+static void*
+PageReAlloc(void* ptr, size_t oldSize, size_t newSize)
+{
+    a->data = mremap(a->data, original_size, a->size, MREMAP_MAYMOVE);
+}
+
+static void 
+PageFree(void* ptr, size_t size) 
+{
+    munmap(ptr, size);
+}
+#endif
+
+
 #include <string.h>
+#include <stdio.h>
 #include <ctype.h>
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
-typedef int i32;
-typedef unsigned char Byte;
 
-typedef struct {
-    Byte* data;
-    i32 ptr;
-    size_t size;
-}Arena;
+#include "arena.h"
+#include "types.h"
 
-size_t round_up_to_page(size_t size) {
+
+static size_t round_up_to_page(size_t size) {
     return (size + 4095) & ~(size_t)4095;
 }
 
 
 void ArenaCreate(Arena* a, size_t size) {
-    a->data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    a->ptr  = 0;
     a->size = round_up_to_page(size);
-
+    a->data = PageAlloc(a->size);
+    a->ptr  = 0;
 }
 
 void* ArenaAlloc(Arena* a, size_t size ) { 
@@ -35,7 +73,7 @@ void* ArenaAlloc(Arena* a, size_t size ) {
             a->size *= 2;
         }
         a->size = round_up_to_page(a->size);
-        a->data = mremap(a->data, original_size, a->size, MREMAP_MAYMOVE);
+        a->data = PageReAlloc(a->data, original_size, a->size);
     }
     void* ret = a->data + a->ptr;
     a->ptr += size;
@@ -53,7 +91,7 @@ void ArenaClear(Arena* a) {
 }
 
 void ArenaFree(Arena* a) {
-    munmap(a->data, a->size);
+    PageFree(a->data, a->size);
 }
 
 void ArenaPrint(Arena* a) {
@@ -86,12 +124,6 @@ void ArenaPrint(Arena* a) {
 }
 
 
-typedef struct {
-    char* data;
-    size_t size;
-} String;
-
-
 String FromChar(Arena* a,char* c) {
     String res = {0};
     size_t size = strlen(c);
@@ -107,32 +139,4 @@ char* ToChar(String* str){
 }
 
 
-int main(i32 argc, char* argv[]){
-    
-    Arena a = {0};
-    
-    ArenaCreate(&a, 153);
-
-    int* ar = ArenaAlloc(&a, sizeof(int)*10);
- 
-    for(int i = 0; i < 10; i++){
-        ar[i] = i;
-    }
-    ar[0] = 3000;
-
-    ArenaPrint(&a);
-    
-    ar = ArenaRelloc(&a, ar, sizeof(int) * 10, sizeof(int) * 15);
-
-    String hello = FromChar(&a, "hello world");
-    String hello2 = FromChar(&a, "hello world to the wowrd");
-    
-    printf("%s\n", hello2.data);
-
-    ArenaPrint(&a);
-
-    printf("\n");
-    
-    return 0;
-}
 
