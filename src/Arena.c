@@ -95,12 +95,12 @@ void ArenaFree(Arena* a) {
 }
 
 void ArenaPrint(Arena* a) {
-    printf("Arena size: %d, ptr: %d\n", a->size, a->ptr);
+    printf("Arena size: %zu, ptr: %d\n", a->size, a->ptr);
     
-    for( int i = 0; i < a->size; i+=16) {
+    for( usize i = 0; i < a->size; i+=16) {
         printf("%04zX: ", i);
         
-        for( int j = 0; j < 16; ++j) {
+        for( usize j = 0; j < 16; ++j) {
             if( i + j == a-> ptr ) {
                 printf(ANSI_COLOR_RED "%02X " ANSI_COLOR_RESET, a->data[i + j] );
             }

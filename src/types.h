@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "arena.h"
 
 typedef unsigned char byte;
 typedef float         f32;
@@ -19,14 +18,6 @@ typedef int64_t       i64;
 typedef size_t        usize;
 
 
-typedef struct {
-    char* data;
-    usize size;
-} String;
-
-
-//String FromChar(Arena* a, char* c);
-//char* ToChar(String* str);
 
 #endif
 
