@@ -5,7 +5,7 @@
 
 typedef struct {
     byte* data;
-    i32 ptr;
+    u32 ptr;
     size_t size;
 }Arena;
 
@@ -20,15 +20,6 @@ void ArenaFree(Arena* a);
 void ArenaPrint(Arena* a);
 
 
-typedef struct {
-    char* data;
-    size_t size;
-} String;
-
-
-String FromChar(Arena* a,char* c);
-
-char* ToChar(String* str);
 
 
 #endif

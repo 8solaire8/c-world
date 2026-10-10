@@ -1,5 +1,5 @@
-#include "../src/arena.h"
-
+#include "arena.h"
+#include "types.h"
 
 int main(i32 argc, char* argv[]){
     
