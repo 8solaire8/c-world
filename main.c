@@ -5,6 +5,8 @@
 #include <windows.h>
 
 
+#include "render.h"
+
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
@@ -17,7 +19,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
-
 
             FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_WINDOW+1));
 
@@ -47,12 +48,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     HWND hwnd = CreateWindowEx(
         0,                              // Optional window styles.
         CLASS_NAME,                     // Window class
-        L"Learn to Program Windows",    // Window text
+        CLASS_NAME,    // Window text
         WS_OVERLAPPEDWINDOW,            // Window style
 
         // Size and position
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-
         NULL,       // Parent window   
         NULL,       // Menu
         hInstance,  // Instance handle
@@ -61,16 +61,24 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
     if (hwnd == NULL)
     {
-        return 0;
+        return EXIT_FAILURE;
     }
 
     ShowWindow(hwnd, nCmdShow);
+    
+    InitRender(hwnd);
 
     MSG msg = {0};
     while (GetMessage(&msg, NULL, 0, 0) > 0)
     {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
+
+        RenderBegin(hwnd);
+        
+        DrawRectangle(1, 2, 3, 4, 6);
+    
+        RenderEnd();
     }
 
     return 0;
