@@ -1,12 +1,24 @@
 #ifndef RENDER_H_
 #define RENDER_H_
 
-void InitRender(HWND hwnd);
-void RenderBegin(HWND hwnd);
+#include "types.h"
 
-void DrawRectangle( u32 x, u32 y, u32 width, u32 hight, u32 colour);
+typedef struct {
+    u8 r, g, b, a;
+} Colour;
 
-void RenderEnd();
+
+
+
+void InitRenderer(HWND hwnd);
+void DestroyRenderer();
+
+
+void PushRect( u32 x, u32 y, u32 width, u32 hight, Colour colour);
+
+
+void FrameBegin(HWND hwnd);
+void FrameEnd();
 
 #endif
 

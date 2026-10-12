@@ -1,5 +1,8 @@
 @echo off
 
+where cl >nul 2>nul
+if %errorlevel% neq 0 call "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat" x64 >nul
+
 set CC=cl
 
 set BUILD_FILES=W:\main.c W:\src\*.c
