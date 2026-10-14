@@ -3,21 +3,22 @@
 
 #include "types.h"
 
-typedef struct {
+typedef struct 
+{
     byte* data;
-    u32 ptr;
-    size_t size;
+    u32   ptr;
+    usize size;
 }Arena;
 
-void ArenaCreate(Arena* a, size_t size);
+void ArenaCreate(Arena* a, usize size);
 
-void* ArenaAlloc(Arena* a, size_t size );
-void* ArenaRelloc(Arena* a, void* old_data, size_t old_size, size_t new_size);
+void* arena_alloc(Arena* a, usize size );
+void* arena_relloc(Arena* a, void* old_data, usize old_size, usize new_size);
 
-void ArenaClear(Arena* a);
-void ArenaFree(Arena* a); 
+void arena_clear(Arena* a);
+void arena_free(Arena* a); 
 
-void ArenaPrint(Arena* a);
+void arena_print(Arena* a);
 
 
 #endif

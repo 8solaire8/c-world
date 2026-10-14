@@ -1,7 +1,12 @@
 @echo off
 
-where cl >nul 2>nul
-if %errorlevel% neq 0 call "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat" x64 >nul
+if not defined VSCMD_ARG_TGT_ARCH (
+    set VSCMD_SKIP_SENDTELEMETRY=1
+    call "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat" x64 >nul
+)
+
+if exist W:build rmdir /s /q  W:\build
+mkdir build
 
 set CC=cl
 
@@ -9,14 +14,12 @@ set BUILD_FILES=W:\main.c W:\src\*.c
 
 set TEST_FILES=W:\test\*.c W:\src\*.c
 
-set BUILD_FLAGS_DEBUG=/DUNICODE /D_UNICODE /D_WINDLL /I W:\src
+set BUILD_FLAGS_DEBUG=/DUNICODE /D_UNICODE /D_WINDLL /Zi /Od /MDd /D_DEBUG /EHsc /I W:\src
 
 
-set LIBS=user32.lib d3d11.lib d3dcompiler.lib dxguid.lib user32.lib /link /subsystem:windows
+set LIBS=user32.lib d3d11.lib d3dcompiler.lib dxguid.lib user32.lib /link /subsystem:windows /DEBUG
 
 set BUILD_FLAGE_RELEASE=""
-
-if not exist "build\" mkdir "build"
 
 pushd "build"
 

@@ -3,13 +3,14 @@
 
 #include "arena.h"
 
-typedef struct {
+typedef struct 
+{
     char* data;
     usize size;
 } String;
 
 
-String FromChar(Arena* a, char* c);
-char* ToChar(String* str);
+String from_char(Arena* a, char* c);
+char* to_char(String* str);
 
 #endif

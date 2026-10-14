@@ -3,13 +3,13 @@
 #include <windows.h>
 
 static void* 
-PageAlloc(size_t size)
+page_alloc(usize size)
 {
     return VirtualAlloc(NULL, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 }
 
 static void 
-PageFree(void* ptr, size_t size)
+page_free(void* ptr, usize size)
 {
     VirtualFree(ptr, size, MEM_RESERVE);
 }
@@ -19,13 +19,13 @@ PageFree(void* ptr, size_t size)
 #include <sys/mman.h>
 
 static void* 
-PageAlloc(size_t size)
+page_alloc(usize size)
 {
     return mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 }
 
 static void 
-PageFree(void* ptr, size_t size) 
+page_free(void* ptr, usize size) 
 {
     munmap(ptr, size);
 }
@@ -45,39 +45,39 @@ PageFree(void* ptr, size_t size)
 #include "types.h"
 
 
-static size_t round_up_to_page(size_t size) {
-    return (size + 4095) & ~(size_t)4095;
+static usize round_up_to_page(usize size) {
+    return (size + 4095) & ~(usize)4095;
 }
 
 
-void ArenaCreate(Arena* a, size_t size) {
+void arena_create(Arena* a, usize size) {
     a->size = round_up_to_page(size);
-    a->data = PageAlloc(a->size);
+    a->data = page_alloc(a->size);
     a->ptr  = 0;
 }
 
-void* ArenaAlloc(Arena* a, size_t size ) { 
+void* arena_alloc(Arena* a, usize size ) { 
     assert(a->ptr + size < a->size);
     void* ret = a->data + a->ptr;
     a->ptr += size;
     return ret;
 }
 
-void* ArenaRelloc(Arena* a, void* old_data, size_t old_size, size_t new_size) { 
-    void* new_data = ArenaAlloc(a, new_size);
+void* arena_relloc(Arena* a, void* old_data, usize old_size, usize new_size) { 
+    void* new_data = arena_alloc(a, new_size);
     memcpy(new_data, old_data, old_size );
     return new_data;
 }
 
-void ArenaClear(Arena* a) {
+void arena_clear(Arena* a) {
     a->ptr = 0;
 }
 
-void ArenaFree(Arena* a) {
-    PageFree(a->data, a->size);
+void arena_free(Arena* a) {
+    page_free(a->data, a->size);
 }
 
-void ArenaPrint(Arena* a) {
+void arena_print(Arena* a) {
     printf("Arena size: %zu, ptr: %d\n", a->size, a->ptr);
     
     for( usize i = 0; i < a->size; i+=16) {
@@ -93,7 +93,7 @@ void ArenaPrint(Arena* a) {
         }
         
         printf(" | ");
-
+        
         for( int j = 0; j < 16; ++j) {
             if( isprint(a->data[i+j]) ) {
                 printf("%c", a->data[i + j] );
@@ -105,6 +105,3 @@ void ArenaPrint(Arena* a) {
         printf("\n");
     }
 }
-
-
-

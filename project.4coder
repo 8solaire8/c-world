@@ -29,6 +29,13 @@ commands = {
  .run = {
   .win = "W:\\build\\main.exe",
   .out = "*run*",
+  .footer_panel = true,
+  .save_dirty_files = false,
+  .cursor_at_end = true,
+ },
+ .debug = {
+  .win = "raddbg.exe W:\\build\\main.exe",
+  .out = "*debug*",
   .footer_panel = false,
   .save_dirty_files = false,
   .cursor_at_end = false,
@@ -38,4 +45,5 @@ commands = {
 fkey_command = {
  .F1 = "build",
  .F2 = "run",
+ .F3 = "debug",
 };
