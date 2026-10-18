@@ -45,39 +45,51 @@ page_free(void* ptr, usize size)
 #include "types.h"
 
 
-static usize round_up_to_page(usize size) {
+static usize 
+round_up_to_page(usize size)
+{
     return (size + 4095) & ~(usize)4095;
 }
 
 
-void arena_create(Arena* a, usize size) {
+void 
+arena_create(Arena* a, usize size)
+{
     a->size = round_up_to_page(size);
     a->data = page_alloc(a->size);
     a->ptr  = 0;
 }
 
-void* arena_alloc(Arena* a, usize size ) { 
+void* 
+arena_alloc(Arena* a, usize size )
+{ 
     assert(a->ptr + size < a->size);
     void* ret = a->data + a->ptr;
     a->ptr += size;
     return ret;
 }
 
-void* arena_relloc(Arena* a, void* old_data, usize old_size, usize new_size) { 
+void* 
+arena_relloc(Arena* a, void* old_data, usize old_size, usize new_size) 
+{ 
     void* new_data = arena_alloc(a, new_size);
     memcpy(new_data, old_data, old_size );
     return new_data;
 }
 
-void arena_clear(Arena* a) {
+void 
+arena_clear(Arena* a) 
+{
     a->ptr = 0;
 }
 
-void arena_free(Arena* a) {
+void arena_free(Arena* a) 
+{
     page_free(a->data, a->size);
 }
 
-void arena_print(Arena* a) {
+void arena_print(Arena* a)
+{
     printf("Arena size: %zu, ptr: %d\n", a->size, a->ptr);
     
     for( usize i = 0; i < a->size; i+=16) {

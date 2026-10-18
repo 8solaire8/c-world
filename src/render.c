@@ -45,15 +45,14 @@ typedef struct
 
 
 
-void 
-InitRenderer(HWND hwnd) 
+bool
+init_renderer(const Window* window) 
 {
-    
     DXGI_SWAP_CHAIN_DESC sd = {0};
     sd.BufferCount = 2;
     sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    sd.OutputWindow = hwnd;
+    sd.OutputWindow = window->hwnd;
     sd.SampleDesc.Count = 1;
     sd.Windowed = TRUE;
     sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
@@ -61,7 +60,7 @@ InitRenderer(HWND hwnd)
     if (FAILED(D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE,
                                              NULL, 0, NULL, 0, D3D11_SDK_VERSION, &sd, &sc, &dev, NULL, &ctx)))
     {
-        exit(EXIT_FAILURE);
+        return false;
     }
     
     IDXGISwapChain_GetBuffer(sc, 0, &IID_ID3D11Texture2D, (void **)&bb);
@@ -93,15 +92,17 @@ InitRenderer(HWND hwnd)
     D3D11_BUFFER_DESC ibd = { INDEX_BUFFER_SIZE, D3D11_USAGE_DYNAMIC, D3D11_BIND_INDEX_BUFFER, D3D11_CPU_ACCESS_WRITE };
     
     ID3D11Device_CreateBuffer(dev, &ibd, NULL, &ib);
+    return true;
 }
 
 void 
-FrameBegin(HWND hwnd) 
+frame_begin(const Window* window) 
 {
-    RECT r;
-    GetClientRect(hwnd, &r);
-    D3D11_VIEWPORT vp = { 0, 0, (float)(r.right - r.left),
-        (float)(r.bottom - r.top), 0, 1 };
+    u16 width, height;
+    get_window_size(window, &width, &height);
+    
+    D3D11_VIEWPORT vp = { 0, 0, (float)(width),
+        (float)(height), 0, 1 };
     float clear[4] = { 0.1f, 0.2f, 0.4f, 1.0f };
     
     ID3D11DeviceContext_OMSetRenderTargets(ctx, 1, &rtv, NULL);
@@ -112,7 +113,7 @@ FrameBegin(HWND hwnd)
 }
 
 void 
-FrameEnd() 
+frame_end() 
 {
     ID3D11DeviceContext_DrawIndexed(ctx, 6, 0, 0); 
     IDXGISwapChain_Present(sc, 1, 0);  // 1 = vsync
@@ -122,23 +123,27 @@ FrameEnd()
 void 
 PushTryangle(u32 x, u32 y, u32 size) 
 { 
-    UINT stride = 2 * sizeof(f32); 
-    UINT offset = 0;
-    ID3D11DeviceContext_IASetVertexBuffers(ctx, 0, 1, &vb, &stride, &offset);
-    ID3D11DeviceContext_VSSetShader(ctx, vs, NULL, 0);
-    ID3D11DeviceContext_PSSetShader(ctx, ps, NULL, 0);
-    
-    ID3D11DeviceContext_Draw(ctx, 3, 0);
     
 }
 
-void 
-PushRect( u32 x, u32 y, u32 width, u32 hight, Colour colour) 
+
+
+u32 
+screen_to_shader(u16 point)
 {
+    // convert -1 to +1 to
+    // going to need to know screen size
+}
+
+void 
+push_rect( u32 x, u32 y, u32 width, u32 hight, Colour colour) 
+{
+    
     f32 verts[] = { 0.5f, 0.5f,   0.5f, -0.5f,   -0.5f, -0.5f,   -0.5f, 0.5f };
     u16 indices[] = { 0, 1, 2,   0, 2, 3 };
     
     D3D11_MAPPED_SUBRESOURCE mapped;
+    
     ID3D11DeviceContext_Map(ctx, (ID3D11Resource*)vb, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
     memcpy(mapped.pData, verts, sizeof(verts));
     ID3D11DeviceContext_Unmap(ctx, (ID3D11Resource*)vb, 0);

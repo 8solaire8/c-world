@@ -1,24 +1,24 @@
-#ifndef RENDER_H_
-#define RENDER_H_
+#ifndef RENDER_H
+#define RENDER_H
 
+#include "platform.h"
 #include "types.h"
+
 
 typedef struct {
     u8 r, g, b, a;
 } Colour;
 
 
+bool init_renderer(const Window* window);
+void destroy_renderer();
 
 
-void InitRenderer(HWND hwnd);
-void DestroyRenderer();
+void push_rect( u32 x, u32 y, u32 width, u32 hight, Colour colour);
 
 
-void PushRect( u32 x, u32 y, u32 width, u32 hight, Colour colour);
-
-
-void FrameBegin(HWND hwnd);
-void FrameEnd();
+void frame_begin(const Window* window);
+void frame_end();
 
 #endif
 
