@@ -15,9 +15,15 @@
 #define VERTEX_BUFFER_SIZE 4096
 #define INDEX_BUFFER_SIZE 512
 
+//static const char shader[] =
+//"float4 vs(float2 p : POS) : SV_Position { return float4(p, 0, 1); }\n"
+//"float4 ps() : SV_Target { return float4(1, 0.5, 0, 1); }\n";
+
 static const char shader[] =
-"float4 vs(float2 p : POS) : SV_Position { return float4(p, 0, 1); }\n"
-"float4 ps() : SV_Target { return float4(1, 0.5, 0, 1); }\n";
+"struct VSIn  { float2 pos : POSITION; float4 col : COLOR; };\n"
+"struct VSOut { float4 pos : SV_POSITION; float4 col : COLOR; };\n"
+"VSOut vs_main(VSIn i) { VSOut o; o.pos = float4(i.pos, 0, 1); o.col = i.col; return o; }\n"
+"float4 ps_main(VSOut i) : SV_TARGET { return i.col; }\n";
 
 static ID3D11DeviceContext *ctx;
 static ID3D11RenderTargetView *rtv;
@@ -37,9 +43,8 @@ static ID3D11Buffer *ib;
 
 typedef struct 
 {
-    int x,y;
+    f32 x,y;
     Colour colour;
-    
 } Vertex;
 
 
@@ -68,8 +73,8 @@ init_renderer(const Window* window)
     ID3D11Texture2D_Release(bb);
     
     ID3DBlob *vsb, *psb;
-    D3DCompile(shader, sizeof shader, NULL, NULL, NULL, "vs", "vs_4_0", 0, 0, &vsb, NULL);
-    D3DCompile(shader, sizeof shader, NULL, NULL, NULL, "ps", "ps_4_0", 0, 0, &psb, NULL);
+    D3DCompile(shader, sizeof shader, NULL, NULL, NULL, "vs_main", "vs_4_0", 0, 0, &vsb, NULL);
+    D3DCompile(shader, sizeof shader, NULL, NULL, NULL, "ps_main", "ps_4_0", 0, 0, &psb, NULL);
     
     ID3D11Device_CreateVertexShader(dev, ID3D10Blob_GetBufferPointer(vsb),
                                     ID3D10Blob_GetBufferSize(vsb), NULL, &vs);
@@ -95,15 +100,18 @@ init_renderer(const Window* window)
     return true;
 }
 
+static Window* g_window;
+
 void 
-frame_begin(const Window* window) 
+frame_begin(Window* window) 
 {
-    u16 width, height;
+    g_window = window;
+    f32 width, height;
     get_window_size(window, &width, &height);
     
-    D3D11_VIEWPORT vp = { 0, 0, (float)(width),
-        (float)(height), 0, 1 };
-    float clear[4] = { 0.1f, 0.2f, 0.4f, 1.0f };
+    D3D11_VIEWPORT vp = { 0, 0, width, height, 0, 1 };
+    
+    f32 clear[4] = { 0.1f, 0.2f, 0.4f, 1.0f };
     
     ID3D11DeviceContext_OMSetRenderTargets(ctx, 1, &rtv, NULL);
     ID3D11DeviceContext_ClearRenderTargetView(ctx, rtv, clear);
@@ -131,15 +139,28 @@ PushTryangle(u32 x, u32 y, u32 size)
 u32 
 screen_to_shader(u16 point)
 {
-    // convert -1 to +1 to
-    // going to need to know screen size
+    
 }
 
 void 
-push_rect( u32 x, u32 y, u32 width, u32 hight, Colour colour) 
+push_rect( f32 x, f32 y, f32 width, f32 height, Colour colour) 
 {
     
-    f32 verts[] = { 0.5f, 0.5f,   0.5f, -0.5f,   -0.5f, -0.5f,   -0.5f, 0.5f };
+    f32 screen_width, screen_height;
+    get_window_size(g_window, &screen_width, &screen_height);
+    
+    f32 left   = (x / screen_width) * 2.0f - 1.0f;
+    f32 right  = ((x + width) / screen_width) * 2.0f - 1.0f;
+    f32 top    = 1.0f - (y / screen_height) * 2.0f;
+    f32 bottom = 1.0f - ((y + height) / screen_height) * 2.0f;
+    
+    Vertex verts[4] = {
+        { left,  top,    colour },   // 0
+        { right, top,    colour },   // 1
+        { left,  bottom, colour },   // 2
+        { right, bottom, colour },   // 3
+    };
+    
     u16 indices[] = { 0, 1, 2,   0, 2, 3 };
     
     D3D11_MAPPED_SUBRESOURCE mapped;
@@ -152,7 +173,7 @@ push_rect( u32 x, u32 y, u32 width, u32 hight, Colour colour)
     memcpy(mapped.pData, indices, sizeof(indices));
     ID3D11DeviceContext_Unmap(ctx, (ID3D11Resource*)ib, 0);
     
-    UINT stride = 2 * sizeof(f32);
+    UINT stride = sizeof(Vertex);
     UINT offset = 0;
     ID3D11DeviceContext_IASetVertexBuffers(ctx, 0, 1, &vb, &stride, &offset);
     ID3D11DeviceContext_IASetIndexBuffer(ctx, ib, DXGI_FORMAT_R16_UINT, 0);

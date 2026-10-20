@@ -1,17 +1,16 @@
 #include "platform.h"
 
 
-
-
 void
-get_window_size(const Window* window, u16* width, u16* hight )
+get_window_size(const Window* window, f32* width, f32* hight )
 {
     RECT rect;
     if ( GetWindowRect(window->hwnd, &rect) )
     {
-        *width = rect.right - rect.left;
-        *hight = rect.bottom - rect.top;
+        *width = (f32)(rect.right - rect.left);
+        *hight = (f32)(rect.bottom - rect.top);
     }
+    
 }
 
 

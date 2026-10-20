@@ -5,8 +5,9 @@
 #include "types.h"
 
 
+
 typedef struct {
-    u8 r, g, b, a;
+    f32 r, g, b, a;
 } Colour;
 
 
@@ -14,10 +15,10 @@ bool init_renderer(const Window* window);
 void destroy_renderer();
 
 
-void push_rect( u32 x, u32 y, u32 width, u32 hight, Colour colour);
+void push_rect( f32 x, f32 y, f32 width, f32 hight, Colour colour);
 
 
-void frame_begin(const Window* window);
+void frame_begin(Window* window);
 void frame_end();
 
 #endif
