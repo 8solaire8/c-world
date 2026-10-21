@@ -82,13 +82,18 @@ init_renderer(const Window* window)
                                    ID3D10Blob_GetBufferSize(psb), NULL, &ps);
     
     
-    D3D11_INPUT_ELEMENT_DESC ied = { "POS", 0, DXGI_FORMAT_R32G32_FLOAT,
-        0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+    D3D11_INPUT_ELEMENT_DESC ied[] = {
+        { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT,       0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
     
-    
-    ID3D11Device_CreateInputLayout(dev, &ied, 1, ID3D10Blob_GetBufferPointer(vsb),
-                                   ID3D10Blob_GetBufferSize(vsb), &il);
-    
+    HRESULT hr = ID3D11Device_CreateInputLayout(dev, ied, ARRAYSIZE(ied),
+                                                ID3D10Blob_GetBufferPointer(vsb),
+                                                ID3D10Blob_GetBufferSize(vsb), &il);
+    if (FAILED(hr))
+    {
+        return false;
+    }
     
     D3D11_BUFFER_DESC bd = { VERTEX_BUFFER_SIZE, D3D11_USAGE_DYNAMIC, D3D11_BIND_VERTEX_BUFFER, D3D11_CPU_ACCESS_WRITE };
     
@@ -111,7 +116,7 @@ frame_begin(Window* window)
     
     D3D11_VIEWPORT vp = { 0, 0, width, height, 0, 1 };
     
-    f32 clear[4] = { 0.1f, 0.2f, 0.4f, 1.0f };
+    f32 clear[4] = { 0.1f, 0.6f, 0.4f, 1.0f };
     
     ID3D11DeviceContext_OMSetRenderTargets(ctx, 1, &rtv, NULL);
     ID3D11DeviceContext_ClearRenderTargetView(ctx, rtv, clear);
@@ -123,8 +128,8 @@ frame_begin(Window* window)
 void 
 frame_end() 
 {
-    ID3D11DeviceContext_DrawIndexed(ctx, 6, 0, 0); 
-    IDXGISwapChain_Present(sc, 1, 0);  // 1 = vsync
+    ID3D11DeviceContext_DrawIndexed(ctx, 12, 0, 0); 
+    IDXGISwapChain_Present(sc, 1, 0);
 }
 
 
@@ -161,7 +166,7 @@ push_rect( f32 x, f32 y, f32 width, f32 height, Colour colour)
         { right, bottom, colour },   // 3
     };
     
-    u16 indices[] = { 0, 1, 2,   0, 2, 3 };
+    u16 indices[] = { 0, 1, 2,   2, 1, 3 };
     
     D3D11_MAPPED_SUBRESOURCE mapped;
     
