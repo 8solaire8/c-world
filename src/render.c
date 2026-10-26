@@ -15,10 +15,6 @@
 #define VERTEX_BUFFER_SIZE 4096
 #define INDEX_BUFFER_SIZE 512
 
-//static const char shader[] =
-//"float4 vs(float2 p : POS) : SV_Position { return float4(p, 0, 1); }\n"
-//"float4 ps() : SV_Target { return float4(1, 0.5, 0, 1); }\n";
-
 static const char shader[] =
 "struct VSIn  { float2 pos : POSITION; float4 col : COLOR; };\n"
 "struct VSOut { float4 pos : SV_POSITION; float4 col : COLOR; };\n"
@@ -48,7 +44,8 @@ typedef struct
 } Vertex;
 
 
-
+static Vertex g_vertex_buffer[VERTEX_BUFFER_SIZE];
+static u16 g_indexs_buffer[INDEX_BUFFER_SIZE];
 
 bool
 init_renderer(const Window* window) 

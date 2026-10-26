@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "multi\\x64\\Debug\\stdio.obj",
+            "outputs": [
+                "multi\\x64\\Debug\\stdio.h.obj.dt.module.json",
+                "multi\\x64\\Debug\\stdio.h.obj.dt.d.json"
+            ],
+            "requires": []
+        }
+    ]
+}

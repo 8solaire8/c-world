@@ -3,33 +3,41 @@
 #ifndef _LANE_H
 #define _LANE_H
 #include "types.h"
+#include "arena.h"
 #define CPU_NUMBER 32
 
 
 typedef struct
 {
-    u64 id;
-    u64 count;
+    U64 id;
+    U64 count;
     
-    u64* shared_buffer;
+    U64* shared_buffer;
     Barrier* barrier;
+
+    Arena arena;
 } LaneContext;
 
 
 typedef struct
 {
-    u64 min;
-    u64 max;
+    U64 min;
+    U64 max;
 } LaneRange;
 
+extern thread_local LaneContext g_lane_context;
 
-u64 lane_count();
-u64 lane_idx();
 
-LaneRange lane_range(u64 values_count);
+void set_lane_context(LaneContext lc);
 
+U64 lane_count();
+U64 lane_idx();
+
+LaneRange lane_range(U64 values_count);
+
+U64 lane_width(LaneRange lr);
 void lane_sync();
-void lane_sync_u64(u64* lane_local_storage, u32 broad_cast_src_lane_idx);
+void lane_sync_u64(void* lane_local_storage, U64 broad_cast_src_lane_idx);
 
 
 #endif //_LANE_H
