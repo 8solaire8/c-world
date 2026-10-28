@@ -1,22 +1,23 @@
 
-#include "string.h"
+#include "str.h"
+#include "Arena.h"
 
-String 
-from_char(Arena* a,char* c) 
+String8 
+string8_new(char* c_string) 
 {
-    String res = {0};
-    size_t size = strlen(c);
-    res.data = arena_alloc(a, size + 1);
-    res.data[size] = '\0';
-    memcpy(res.data, c, size);
+    String8 res = {0};
+    U64 size = strlen(c_string);
+    res.data = c_string;
     res.size = size;
     return res;
 }
 
-char* 
-to_char(String* str)
+char*
+string8_to_char(Arena* arena, const String8* str)
 {
-    return str->data;
+    char* res = arena_alloc(arena, str->size);
+    memcpy(res, str->data, str->size);
+    return res;
 }
 
 

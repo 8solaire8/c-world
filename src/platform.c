@@ -2,13 +2,13 @@
 
 
 void
-get_window_size(const Window* window, f32* width, f32* hight )
+get_window_size(const Window* window, F32* width, F32* hight )
 {
     RECT rect;
     if ( GetWindowRect(window->hwnd, &rect) )
     {
-        *width = (f32)(rect.right - rect.left);
-        *hight = (f32)(rect.bottom - rect.top);
+        *width = (F32)(rect.right - rect.left);
+        *hight = (F32)(rect.bottom - rect.top);
     }
     
 }
@@ -36,9 +36,9 @@ create_window_win32(Window* window, HINSTANCE instance, int show)
 
 
 bool
-start_window(Window* window, const wchar_t* CLASS_NAME, u16 width, u16 hight)
+start_window(Window* window, const wchar_t* CLASS_NAME, U16 width, U16 hight)
 {
-    WNDCLASS wc = { };
+    WNDCLASS wc = { 0 };
     
     wc.lpfnWndProc   = WindowProc;
     wc.hInstance     = window->instance;

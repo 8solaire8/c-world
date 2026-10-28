@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 
+#include "platform.h"
 #include "defs.h"
 #include "render.h"
 #include "arena.h"
@@ -39,13 +40,16 @@ static ID3D11Buffer *ib;
 
 typedef struct 
 {
-    f32 x,y;
+    F32 x,y;
     Colour colour;
 } Vertex;
 
 
-static Vertex g_vertex_buffer[VERTEX_BUFFER_SIZE];
-static u16 g_indexs_buffer[INDEX_BUFFER_SIZE];
+static U64     g_vertex_buffer_count = 0;
+static Vertex *g_vertex_buffer;
+
+static U64  g_index_buffer_count = 0;
+static U16 *g_index_buffer;
 
 bool
 init_renderer(const Window* window) 
@@ -108,79 +112,97 @@ void
 frame_begin(Window* window) 
 {
     g_window = window;
-    f32 width, height;
+    F32 width, height;
     get_window_size(window, &width, &height);
     
     D3D11_VIEWPORT vp = { 0, 0, width, height, 0, 1 };
     
-    f32 clear[4] = { 0.1f, 0.6f, 0.4f, 1.0f };
+    F32 clear[4] = { 0.1f, 0.6f, 0.4f, 1.0f };
+    
+    g_index_buffer_count = 0;
+    g_vertex_buffer_count = 0;
     
     ID3D11DeviceContext_OMSetRenderTargets(ctx, 1, &rtv, NULL);
     ID3D11DeviceContext_ClearRenderTargetView(ctx, rtv, clear);
     ID3D11DeviceContext_RSSetViewports(ctx, 1, &vp);
     ID3D11DeviceContext_IASetPrimitiveTopology(ctx, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     ID3D11DeviceContext_IASetInputLayout(ctx, il);
+    
+    
+    D3D11_MAPPED_SUBRESOURCE mapped;
+    
+    ID3D11DeviceContext_Map(ctx, (ID3D11Resource*)vb, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+    
+    g_vertex_buffer = (Vertex*)mapped.pData;
+    
+    ID3D11DeviceContext_Map(ctx, (ID3D11Resource*)ib, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+    
+    g_index_buffer = (U16*)mapped.pData;
 }
 
 void 
 frame_end() 
 {
-    ID3D11DeviceContext_DrawIndexed(ctx, 12, 0, 0); 
+    D3D11_MAPPED_SUBRESOURCE mapped;
+    
+    ID3D11DeviceContext_Unmap(ctx, (ID3D11Resource*)vb, 0);
+    ID3D11DeviceContext_Unmap(ctx, (ID3D11Resource*)ib, 0);
+    
+    g_vertex_buffer = NULL;
+    g_index_buffer  = NULL;
+    
+    U32 stride = sizeof(Vertex);
+    U32 offset = 0;
+    ID3D11DeviceContext_IASetVertexBuffers(ctx, 0, 1, &vb, &stride, &offset);
+    ID3D11DeviceContext_IASetIndexBuffer(ctx, ib, DXGI_FORMAT_R16_UINT, 0);
+    ID3D11DeviceContext_VSSetShader(ctx, vs, NULL, 0);
+    ID3D11DeviceContext_PSSetShader(ctx, ps, NULL, 0);
+    
+    ID3D11DeviceContext_DrawIndexed(ctx, g_index_buffer_count, 0, 0); 
     IDXGISwapChain_Present(sc, 1, 0);
 }
 
 
 void 
-PushTryangle(u32 x, u32 y, u32 size) 
+PushTryangle(U32 x, U32 y, U32 size) 
 { 
     
 }
 
 
 
-u32 
-screen_to_shader(u16 point)
+U32 
+screen_to_shader(U16 point)
 {
     
 }
 
 void 
-push_rect( f32 x, f32 y, f32 width, f32 height, Colour colour) 
+push_rect( F32 x, F32 y, F32 width, F32 height, Colour colour) 
 {
     
-    f32 screen_width, screen_height;
+    F32 screen_width, screen_height;
     get_window_size(g_window, &screen_width, &screen_height);
     
-    f32 left   = (x / screen_width) * 2.0f - 1.0f;
-    f32 right  = ((x + width) / screen_width) * 2.0f - 1.0f;
-    f32 top    = 1.0f - (y / screen_height) * 2.0f;
-    f32 bottom = 1.0f - ((y + height) / screen_height) * 2.0f;
+    F32 left   = (x / screen_width) * 2.0f - 1.0f;
+    F32 right  = ((x + width) / screen_width) * 2.0f - 1.0f;
+    F32 top    = 1.0f - (y / screen_height) * 2.0f;
+    F32 bottom = 1.0f - ((y + height) / screen_height) * 2.0f;
     
-    Vertex verts[4] = {
-        { left,  top,    colour },   // 0
-        { right, top,    colour },   // 1
-        { left,  bottom, colour },   // 2
-        { right, bottom, colour },   // 3
-    };
+    U16 base = (U16)g_vertex_buffer_count;
     
-    u16 indices[] = { 0, 1, 2,   2, 1, 3 };
+    g_vertex_buffer[g_vertex_buffer_count++] = (Vertex) { left ,  top,    colour };
+    g_vertex_buffer[g_vertex_buffer_count++] = (Vertex) { right,  top,    colour };
+    g_vertex_buffer[g_vertex_buffer_count++] = (Vertex) { left,   bottom, colour };
+    g_vertex_buffer[g_vertex_buffer_count++] = (Vertex) { right,  bottom, colour };
     
-    D3D11_MAPPED_SUBRESOURCE mapped;
+    g_index_buffer[g_index_buffer_count++] = base + 0;
+    g_index_buffer[g_index_buffer_count++] = base + 1;
+    g_index_buffer[g_index_buffer_count++] = base + 2;
+    g_index_buffer[g_index_buffer_count++] = base + 2;
+    g_index_buffer[g_index_buffer_count++] = base + 1;
+    g_index_buffer[g_index_buffer_count++] = base + 3;
     
-    ID3D11DeviceContext_Map(ctx, (ID3D11Resource*)vb, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-    memcpy(mapped.pData, verts, sizeof(verts));
-    ID3D11DeviceContext_Unmap(ctx, (ID3D11Resource*)vb, 0);
-    
-    ID3D11DeviceContext_Map(ctx, (ID3D11Resource*)ib, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-    memcpy(mapped.pData, indices, sizeof(indices));
-    ID3D11DeviceContext_Unmap(ctx, (ID3D11Resource*)ib, 0);
-    
-    UINT stride = sizeof(Vertex);
-    UINT offset = 0;
-    ID3D11DeviceContext_IASetVertexBuffers(ctx, 0, 1, &vb, &stride, &offset);
-    ID3D11DeviceContext_IASetIndexBuffer(ctx, ib, DXGI_FORMAT_R16_UINT, 0);
-    ID3D11DeviceContext_VSSetShader(ctx, vs, NULL, 0);
-    ID3D11DeviceContext_PSSetShader(ctx, ps, NULL, 0);
     
 }
 

@@ -7,7 +7,7 @@
 
 
 typedef struct {
-    f32 r, g, b, a;
+    F32 r, g, b, a;
 } Colour;
 
 
@@ -15,7 +15,7 @@ bool init_renderer(const Window* window);
 void destroy_renderer();
 
 
-void push_rect( f32 x, f32 y, f32 width, f32 hight, Colour colour);
+void push_rect( F32 x, F32 y, F32 width, F32 hight, Colour colour);
 
 
 void frame_begin(Window* window);

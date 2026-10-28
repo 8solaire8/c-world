@@ -62,7 +62,7 @@ required_pages(U64 memory_size)
     U64 page_number = memory_size / PAGE_SIZE;
     if (memory_size % PAGE_SIZE != 0)
     {
-        page_number + 1;
+        page_number += 1;
     }
     return page_number;
 }
@@ -115,7 +115,7 @@ void arena_free(Arena* a)
 
 void arena_print(Arena* a)
 {
-    printf("Arena size: %zu, ptr: %d\n", a->size, a->ptr);
+    printf("Arena size: %zu, ptr: %lld\n", a->size, a->ptr);
     
     for(U64 i = 0; i < a->size; i+=16) {
         printf("%04zX: ", i);

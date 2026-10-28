@@ -5,12 +5,12 @@
 
 typedef struct 
 {
-    char* data;
-    usize size;
-} String;
+    U8*   data;
+    U64   size;
+} String8;
 
 
-String from_char(Arena* a, char* c);
-char* to_char(String* str);
+String8 string8_new(char* c);
+char* string8_to_char(Arena* arena, const String8* str);
 
 #endif

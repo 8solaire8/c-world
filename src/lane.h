@@ -1,7 +1,6 @@
-/* date = October 20th 2026 8:37 pm */
-
-#ifndef _LANE_H
-#define _LANE_H
+#ifndef LANE_H
+#define LANE_H
+#include "platform.h"
 #include "types.h"
 #include "arena.h"
 #define CPU_NUMBER 32
@@ -14,7 +13,7 @@ typedef struct
     
     U64* shared_buffer;
     Barrier* barrier;
-
+    
     Arena arena;
 } LaneContext;
 

@@ -28,9 +28,9 @@ typedef struct
 
 void create_window_win32(Window* window, HINSTANCE instance, int show);
 
-void get_window_size(const Window* window, f32* width, f32* height);
+void get_window_size(const Window* window, F32* width, F32* height);
 
-bool start_window(Window* window, const wchar_t* name, u16 width, u16 hight);
+bool start_window(Window* window, const wchar_t* name, U16 width, U16 hight);
 
 
 #if defined(_WIN32)
@@ -41,14 +41,14 @@ typedef struct
     SYNCHRONIZATION_BARRIER impl; 
 } Barrier;
 
-static inline i32 
+static inline S32 
 barrier_init(Barrier *b, unsigned count) 
 {
     if (count == 0) return -1;
     return InitializeSynchronizationBarrier(&b->impl, (LONG)count, -1) ? 0 : -1;
 }
 
-static inline i32 
+static inline S32 
 barrier_wait(Barrier *b) 
 {
     return EnterSynchronizationBarrier(&b->impl, 0) ? 1 : 0;
@@ -68,14 +68,14 @@ typedef struct
     pthread_Barrier impl;
 } Barrier;
 
-static inline i32 
+static inline S32 
 barrier_init(Barrier *b, unsigned count) 
 {
     if (count == 0) return -1;
     return pthread_barrier_init(&b->impl, NULL, count) == 0 ? 0 : -1;
 }
 
-static inline i32 
+static inline S32 
 barrier_wait(Barrier *b) 
 {
     int rc = pthread_barrier_wait(&b->impl);
