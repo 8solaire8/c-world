@@ -202,8 +202,6 @@ push_rect( F32 x, F32 y, F32 width, F32 height, Colour colour)
     g_index_buffer[g_index_buffer_count++] = base + 2;
     g_index_buffer[g_index_buffer_count++] = base + 1;
     g_index_buffer[g_index_buffer_count++] = base + 3;
-    
-    
 }
 
 

@@ -36,6 +36,8 @@ wWinMain(HINSTANCE instance, HINSTANCE h_instance, PWSTR cmd, int show)
         
         push_rect(100, 50, 30, 30, (Colour){1.0f,0.0f,0.0f,1.0f});
         
+        push_rect(300, 300, 300, 250, (Colour){0.0f,1.0f,1.0f,1.0f});
+        
         push_rect(500, 500, 30, 30, (Colour){0.0f,0.0f,1.0f,1.0f});
         
         frame_end();
