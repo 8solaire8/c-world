@@ -180,7 +180,6 @@ screen_to_shader(U16 point)
 void 
 push_rect( F32 x, F32 y, F32 width, F32 height, Colour colour) 
 {
-    
     F32 screen_width, screen_height;
     get_window_size(g_window, &screen_width, &screen_height);
     
