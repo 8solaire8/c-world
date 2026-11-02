@@ -6,7 +6,7 @@
 
 #include "platform.h"
 #include "render.h"
-
+#include "audio.h"
 
 int WINAPI 
 wWinMain(HINSTANCE instance, HINSTANCE h_instance, PWSTR cmd, int show)
@@ -23,6 +23,10 @@ wWinMain(HINSTANCE instance, HINSTANCE h_instance, PWSTR cmd, int show)
     {
         return 1;
     }
+    
+    audio_init();
+    
+    //audio_thread();
     
     init_renderer(&window);
     

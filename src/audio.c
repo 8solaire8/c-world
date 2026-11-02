@@ -50,32 +50,33 @@ audio_init()
     assert(SUCCEEDED(hr));
     
     hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(enumerator, eRender, eConsole, &renderer);
-    if(!SUCEEDED(hr)) return false;
+    if(!SUCCEEDED(hr)) return false;
     
     IMMDeviceEnumerator_Release(enumerator);
     
-    if(!SUCEEDED(hr)) return false;
+    if(!SUCCEEDED(hr)) return false;
     
     hr = IMMDevice_Activate(renderer, &IID_IAudioClient, CLSCTX_ALL, NULL, (void**)&renderClient);
     
-    if(!SUCEEDED(hr)) return false;
+    if(!SUCCEEDED(hr)) return false;
     
     hr = IAudioClient_GetMixFormat(renderClient, &format);
     
-    if(!SUCEEDED(hr)) return false;
+    if(!SUCCEEDED(hr)) return false;
     
     hr = IAudioClient_Initialize(renderClient, AUDCLNT_SHAREMODE_SHARED, 0, 10000000, 0, format, NULL);
     
-    if(!SUCEEDED(hr)) return false;
+    if(!SUCCEEDED(hr)) return false;
     
     hr = IAudioClient_GetService(renderClient, &IID_IAudioRenderClient, (void**)&renderService);
     
-    if(!SUCEEDED(hr)) return false;
+    if(!SUCCEEDED(hr)) return false;
 }
 
 void 
 audio_thread()
 {
+    HRESULT hr;
     hr = IAudioClient_Start(renderClient);
     
     if(!SUCCEEDED(hr))

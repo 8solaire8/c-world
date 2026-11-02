@@ -2,7 +2,7 @@
 
 if not defined VSCMD_ARG_TGT_ARCH (
     set VSCMD_SKIP_SENDTELEMETRY=1
-    call "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvarsall.bat" x64 >nul
+    call "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars64.bat"
 )
 
 if exist W:build rmdir /s /q  W:\build
@@ -14,7 +14,7 @@ set BUILD_FILES=W:\main.c W:\src\*.c
 
 set TEST_FILES=W:\test\*.c W:\src\*.c
 
-set BUILD_FLAGS_DEBUG=/DUNICODE /D_UNICODE /D_WINDLL /Zi /Od /MDd /D_DEBUG /EHsc /I W:\src
+set BUILD_FLAGS_DEBUG=/DUNICODE /D_UNICODE /W3 /D_WINDLL /Zi /Od /MDd /D_DEBUG /EHsc /I W:\src
 
 
 set LIBS=user32.lib d3d11.lib d3dcompiler.lib dxguid.lib user32.lib /link /subsystem:windows /DEBUG
