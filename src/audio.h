@@ -7,14 +7,15 @@
 
 typedef struct 
 {
-    F32* buffer;
-    size_t size;
+    U64 size;
+    U32 id;
+    F32* data;
 } Sound;
 
 typedef struct 
 {
-    U32 sound_id;
     U64  pos;
+    U32 sound_id;
     bool finished;
 } PlayingSound;
 
@@ -26,7 +27,9 @@ typedef struct
 } AudioCmd;
 
 
+void load_sounds();
 bool audio_init();
+void start_audio_thread();
 
 void play_sound(U32 id);
 

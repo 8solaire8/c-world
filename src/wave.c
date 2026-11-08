@@ -1,5 +1,7 @@
 #include <string.h>
 #include <stdio.h>
+
+#include "wave.h"
 #include "types.h"
 
 
@@ -75,4 +77,16 @@ read_wave_file(const char* filename, F32* buffer)
 {
     FILE* f = fopen(filename, "wb");
     return 1;
+}
+
+U64
+wav_size(String8 file_name)
+{
+    return 0;
+}
+
+void 
+wav_load(F32* output, String8 file_name)
+{
+    
 }

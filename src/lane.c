@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include "types.h"
 #include "defs.h"
 #include "lane.h"

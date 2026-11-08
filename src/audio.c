@@ -7,8 +7,13 @@
 #include <assert.h>
 #include <math.h>
 
+#include "stb_ds.h"
+
 #include "audio.h"
 #include "defs.h"
+#include "arena.h"
+#include "audio.h"
+#include "wave.h"
 
 #pragma comment(lib, "ole32.lib")
 
@@ -24,17 +29,100 @@ static IMMDeviceEnumerator* enumerator = NULL;
 static IMMDevice* renderer = NULL;
 static IAudioClient* renderClient = NULL;
 static IAudioRenderClient* renderService = NULL;
-
+static HANDLE audio_event;
 static WAVEFORMATEX* format = NULL;
 
+static Sound* g_sounds;
+static AudioCmd audio_cmd;
+static PlayingSound* playing_sounds;
 
-// TO DO
-// make event driven 
-// have it work if sound source changes
 
+
+void
+gen_sign_wave_buff(F32 frequency, 
+                   F32* samples,
+                   F32* phase,
+                   U32 channels,
+                   U64 nFrames, 
+                   F32 samples_per_second)
+{
+    
+    for (U64 i = 0; i < nFrames; ++i) 
+    {
+        F32 sample = sinf(*phase) * 0.1f;
+        
+        for (U64 c = 0; c < channels; ++c ) 
+        {
+            samples[i * channels + c] = sample;
+        }
+        
+        *phase += ((F32)M_TAU * frequency) / samples_per_second;
+        
+        if (*phase >= M_TAU) 
+        {
+            *phase -= (F32)M_TAU;
+        }
+    }
+}
+
+int is_audio_file(const char *filename)
+{
+    const char *ext = strrchr(filename, '.');
+    return ext &&
+    (_stricmp(ext, ".ogg") == 0 || _stricmp(ext, ".wav") == 0);
+}
+
+void
+load_sounds(Arena* arena)
+{
+    ArenaTemp temp = get_scratch();
+    
+    WIN32_FIND_DATAA entry;
+    HANDLE find = FindFirstFileA("W:\\res\\sound\\*", &entry);
+    
+    assert(find != INVALID_HANDLE_VALUE);
+    
+    g_sounds = push_array_zero(arena, Sound, 256);
+    
+    U32 sound_idx = 0;
+    do {
+        if (entry.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+        {
+            continue;
+        }
+        if (is_audio_file(entry.cFileName))
+        {
+            // open file and read it into sound
+            Sound* s = &g_sounds[sound_idx++];
+            s->id = sound_idx;
+            String8 str = string8_new(entry.cFileName);
+            s->size = wav_size(str);
+            
+            s->data = push_array(arena, F32, s->size);
+            wav_load(s->data, str);
+        }
+        
+    } while (FindNextFileA(find, &entry));
+    FindClose(find);
+    
+    release_scratch(temp);
+}
+
+void 
+play_sound(U32 id)
+{
+    
+}
+
+
+// TODO: have it work if sound source changes
+// TODO: implementing of the pushing of audio
 bool
 audio_init() 
 {
+    audio_event = CreateEvent(NULL, FALSE, FALSE, NULL);
+    if(audio_event == NULL) return false;
+    
     HRESULT hr;
     
     hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
@@ -64,17 +152,29 @@ audio_init()
     
     if(!SUCCEEDED(hr)) return false;
     
-    hr = IAudioClient_Initialize(renderClient, AUDCLNT_SHAREMODE_SHARED, 0, 10000000, 0, format, NULL);
+    hr = IAudioClient_Initialize(renderClient, 
+                                 AUDCLNT_SHAREMODE_SHARED,
+                                 AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
+                                 0, 0,
+                                 format,
+                                 NULL);
     
     if(!SUCCEEDED(hr)) return false;
+    
+    hr = IAudioClient_SetEventHandle(renderClient, audio_event);
+    
+    if(!SUCCEEDED(hr)) return false;
+    
     
     hr = IAudioClient_GetService(renderClient, &IID_IAudioRenderClient, (void**)&renderService);
     
     if(!SUCCEEDED(hr)) return false;
+    return true;
 }
 
-void 
-audio_thread()
+
+DWORD WINAPI
+audio_thread(LPVOID arg)
 {
     HRESULT hr;
     hr = IAudioClient_Start(renderClient);
@@ -84,8 +184,8 @@ audio_thread()
         return false;
     }
     
-    F64 phase = 0;
-    DWORD flags;
+    F32 phase = 0;
+    //DWORD flags;
     BYTE* buffer;
     
     U32 bufferFrames, padding;
@@ -93,47 +193,53 @@ audio_thread()
     
     while (true) 
     {
+        DWORD wait = WaitForSingleObject(audio_event, INFINITE);
+        
+        if (wait != WAIT_OBJECT_0)
+        {
+            break;
+        }
+        
         IAudioClient_GetCurrentPadding(renderClient, &padding);
-        UINT32 nFrames = bufferFrames - padding;
+        U32 nFrames = bufferFrames - padding;
         
         if (nFrames == 0)
         {
             continue;
         }
         
-        
         hr = IAudioRenderClient_GetBuffer(renderService, nFrames, &buffer);
-        
         if (!SUCCEEDED(hr))
     	{ 
             continue;
         }
         
-        F32* samples = (F32*)buffer;
-        U32 channels = (U32)format->nChannels;
+        gen_sign_wave_buff(440.0f,
+                           (F32*)buffer, 
+                           &phase,
+                           format->nChannels,
+                           nFrames, 
+                           (F32)format->nSamplesPerSec);
         
-        for (U64 i = 0; i < nFrames; ++i) 
-        {
-            F32 sample = sinf(phase) * 0.1f;
-            
-            for (int c = 0; c < channels; ++c ) 
-            {
-                samples[i * channels + c] = sample;
-            }
-            
-            phase += (M_TAU * 440.0) / (F64)(format->nSamplesPerSec);
-            
-            if (phase >= M_TAU) 
-            {
-                phase -= M_TAU;
-            }
-        }
         
         hr = IAudioRenderClient_ReleaseBuffer(renderService, nFrames, 0);
     }
     
 }
 
+
+void 
+start_audio_thread()
+{
+    HANDLE thread = CreateThread(NULL,
+                                 0,
+                                 audio_thread,
+                                 NULL,
+                                 0,
+                                 NULL
+                                 );
+    
+}
 
 void
 audio_free()

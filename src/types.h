@@ -7,6 +7,7 @@
 
 #define local_function static 
 
+typedef void*         RawPtr;
 typedef float         F32;
 typedef double        F64;
 typedef uint8_t       U8;

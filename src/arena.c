@@ -9,7 +9,7 @@
 #include "types.h"
 #include "defs.h"
 #include "arena.h"
-
+#include "platform.h"
 
 
 #ifdef _WIN32
@@ -28,9 +28,9 @@ pages_release(void* ptr, U64 size)
 }
 
 static void*
-pages_commit(void* ptr, U64 commited, U64 size)
+pages_commit(void* ptr, U64 current_commited_bytes, U64 new_bytes_to_commit)
 {
-    return VirtualAlloc( (U8*)ptr + commited, size, MEM_COMMIT, PAGE_READWRITE);
+    return VirtualAlloc( (U8*)ptr + current_commited_bytes, new_bytes_to_commit, MEM_COMMIT, PAGE_READWRITE);
 }
 
 #else
@@ -69,37 +69,68 @@ required_pages(U64 memory_size)
 
 
 void 
-arena_create(Arena* a, U64 size)
+arena_alloc(Arena* a, U64 capacity)
 {
-    assert(size % PAGE_SIZE == 0);
-    pages_reserve(GIGABYTES(4));
-    a->data = pages_commit(a->data, a->size, size);
-    a->size = size;
-    a->ptr  = 0;
+    assert(capacity % PAGE_SIZE == 0);
+    a->capacity = capacity;
+    a->data = pages_reserve(a->capacity);
 }
 
-void* 
-arena_alloc(Arena* a, U64 size )
-{ 
-    if (a->ptr + size >= a->size)
+void 
+arena_release(Arena* a) 
+{
+    pages_release(a->data, a->size);
+}
+
+RawPtr
+arena_push(Arena* a, U64 size_of_new)
+{
+    U64 required = a->ptr + size_of_new;
+    if ( required > a->size)
     {
-        assert(a->ptr + size < GIGABYTES(4));
+        assert(required <= GIGABYTES(4));
         
-        U64 new_size = round_up_to_page(size);
-        pages_commit(a->data, a->size, new_size);
-        a->size += new_size;
+        U64 size_to_commit = round_up_to_page(required - a->size);
+        RawPtr res = pages_commit(a->data, a->size, size_to_commit);
+        assert(res);
+        a->size += size_to_commit;
     }
     void* ret = a->data + a->ptr;
-    a->ptr += size;
+    a->ptr += size_of_new;
     return ret;
 }
 
-void* 
-arena_relloc(Arena* a, void* old_data, U64 old_size, U64 new_size)
-{ 
-    void* new_data = arena_alloc(a, new_size);
-    memcpy(new_data, old_data, old_size );
-    return new_data;
+RawPtr
+arena_push_zero(Arena* a, U64 size_of_new)
+{
+    RawPtr p = arena_push(a, size_of_new);
+    memset(p, 0, size_of_new);
+    return p;
+}
+
+void
+arena_pop(Arena* a, U64 size)
+{
+    if (a->ptr < size)
+    {
+        a->ptr = 0;
+    }
+    else 
+    {
+        a->ptr -= size;
+    }
+}
+
+U64
+arena_get_pos(Arena* a)
+{
+    return a->ptr;
+}
+
+void 
+arena_set_pos(Arena* a, U64 pos)
+{
+    a->ptr = pos;
 }
 
 void 
@@ -108,12 +139,8 @@ arena_clear(Arena* a)
     a->ptr = 0;
 }
 
-void arena_free(Arena* a) 
-{
-    pages_release(a->data, a->size);
-}
-
-void arena_print(Arena* a)
+void 
+arena_print(Arena* a)
 {
     printf("Arena size: %zu, ptr: %lld\n", a->size, a->ptr);
     
@@ -142,3 +169,36 @@ void arena_print(Arena* a)
         printf("\n");
     }
 }
+
+thread_local Arena ctx_arena;
+
+void
+init_scratch()
+{
+    arena_alloc(&ctx_arena, GIGABYTES(4));
+}
+
+ArenaTemp 
+arena_temp_begin(Arena* a)
+{
+    ArenaTemp temp = {0};
+    temp.arena = a;
+    temp.pos = a->ptr;
+    return temp;
+}
+
+void 
+arena_temp_end(ArenaTemp temp)
+{
+    arena_set_pos(temp.arena, temp.pos);
+}
+
+ArenaTemp 
+get_scratch()
+{
+    ArenaTemp temp = {0};
+    temp.arena = &ctx_arena;
+    temp.pos = ctx_arena.ptr;
+    return temp;
+}
+

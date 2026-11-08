@@ -13,4 +13,7 @@ typedef struct
 String8 string8_new(char* c);
 char* string8_to_char(Arena* arena, const String8* str);
 
+
+S32 compare_strings(const char* str1, const char* str2);
+
 #endif
