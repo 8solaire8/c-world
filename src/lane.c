@@ -1,31 +1,38 @@
 #include "types.h"
 #include "defs.h"
 #include "lane.h"
+#include "arena.h"
 
-thread_local LaneContext g_lane_context;
+thread_local Context context;
+static Barrier barrier;
+static U64 shared_buffer;
 
 void
-set_lane_context(LaneContext lc)
+context_create(U64 id, U64 count)
 {
-    g_lane_context = lc;
+    context.id = id;
+    context.count = count;
+    context.shared_buffer = &shared_buffer;
+    context.barrier = &barrier;
+    arena_create(&context.arena, GIGABYTES(4));
 }
 
 U64
 lane_idx()
 {
-    return g_lane_context.id;
+    return context.id;
 }
 
 U64
 lane_count()
 {
-    return g_lane_context.count;
+    return context.count;
 }
 
 void 
 lane_sync()
 {
-    barrier_wait(g_lane_context.barrier);
+    barrier_wait(context.barrier);
 }
 
 LaneRange 
@@ -62,13 +69,13 @@ lane_sync_u64(void* lane_local_storage, U64 broadcast_src_lane_idx)
     
     if (lane_idx() == broadcast_src_lane_idx)
     {
-        CopyMemory(g_lane_context.shared_buffer, lane_local_storage, broadcast_size);
+        CopyMemory(context.shared_buffer, lane_local_storage, broadcast_size);
     }
     lane_sync();
     
     if (lane_idx() != broadcast_src_lane_idx)
     {
-        CopyMemory(lane_local_storage, g_lane_context.shared_buffer, broadcast_size);
+        CopyMemory(lane_local_storage, context.shared_buffer, broadcast_size);
     }
     lane_sync();
 }

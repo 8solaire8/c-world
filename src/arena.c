@@ -1,16 +1,12 @@
-#include <string.h>
 #include <stdio.h>
-#include <ctype.h>
 #include <assert.h>
 
-#define ANSI_COLOR_RED     "\x1b[31m"
-#define ANSI_COLOR_RESET   "\x1b[0m"
-
+#include "arena.h"
 #include "types.h"
 #include "defs.h"
-#include "arena.h"
 #include "platform.h"
-
+#include "str.h"
+#include "lane.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -69,7 +65,7 @@ required_pages(U64 memory_size)
 
 
 void 
-arena_alloc(Arena* a, U64 capacity)
+arena_create(Arena* a, U64 capacity)
 {
     assert(capacity % PAGE_SIZE == 0);
     a->capacity = capacity;
@@ -104,9 +100,20 @@ RawPtr
 arena_push_zero(Arena* a, U64 size_of_new)
 {
     RawPtr p = arena_push(a, size_of_new);
-    memset(p, 0, size_of_new);
+    ZeroMemory(p, size_of_new);
     return p;
 }
+
+String8*
+arena_dmp_str(Arena*a, const char* c_str)
+{
+    String8* res = push_struct(a, String8);
+    res->size = cstr_len(c_str);
+    res->data = arena_push_zero(a, res->size);
+    CopyMemory(res->data, c_str, res->size);
+    return res;
+}
+
 
 void
 arena_pop(Arena* a, U64 size)
@@ -159,7 +166,7 @@ arena_print(Arena* a)
         printf(" | ");
         
         for( int j = 0; j < 16; ++j) {
-            if( isprint(a->data[i+j]) ) {
+            if( is_ascii(a->data[i+j]) ) {
                 printf("%c", a->data[i + j] );
             }
             else {
@@ -168,14 +175,6 @@ arena_print(Arena* a)
         }
         printf("\n");
     }
-}
-
-thread_local Arena ctx_arena;
-
-void
-init_scratch()
-{
-    arena_alloc(&ctx_arena, GIGABYTES(4));
 }
 
 ArenaTemp 
@@ -193,12 +192,15 @@ arena_temp_end(ArenaTemp temp)
     arena_set_pos(temp.arena, temp.pos);
 }
 
+// TODO: addapt this such that it can have multiple scratches in each context and stop conflict between them
+//ArenaTemp GetScratch(Arena **conflicts, U64 conflict_count); // grabs a thread-local scratch arena
+
 ArenaTemp 
 get_scratch()
 {
     ArenaTemp temp = {0};
-    temp.arena = &ctx_arena;
-    temp.pos = ctx_arena.ptr;
+    temp.arena = &context.arena;
+    temp.pos = context.arena.ptr;
     return temp;
 }
 

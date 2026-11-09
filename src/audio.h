@@ -1,5 +1,3 @@
-/* date = November 2nd 2026 10:30 pm */
-
 #ifndef AUDIO_H
 #define AUDIO_H
 
@@ -28,10 +26,12 @@ typedef struct
 
 
 void load_sounds();
-bool audio_init();
-void start_audio_thread();
-
 void play_sound(U32 id);
+
+bool audio_create();
+void audio_release();
+
+void audio_thread_start();
 
 
 #endif //AUDIO_H

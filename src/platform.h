@@ -1,9 +1,7 @@
-/* date = October 18th 2026 11:25 am */
-
 #ifndef PLATFORM_H
 #define PLATFORM_H
-#include "types.h"
 
+#include "types.h"
 
 #ifndef thread_local
 #ifdef _WIN32
@@ -16,15 +14,13 @@
 #endif
 #endif
 
-
-// TODO: make this opac to work on any
-//typedef struct Window Window;
-typedef struct
+//TODO: make this an opac type that works on linux
+struct Window
 {
     HWND hwnd;
     HINSTANCE instance;
-    int show;
-} Window;
+    S32 show;
+};
 
 void create_window_win32(Window* window, HINSTANCE instance, int show);
 
@@ -36,13 +32,13 @@ bool start_window(Window* window, const wchar_t* name, U16 width, U16 hight);
 #if defined(_WIN32)
 #include <windows.h>
 
-typedef struct 
+struct Barrier
 { 
     SYNCHRONIZATION_BARRIER impl; 
-} Barrier;
+};
 
 static inline S32 
-barrier_init(Barrier *b, unsigned count) 
+barrier_create(Barrier *b, unsigned count) 
 {
     if (count == 0) return -1;
     return InitializeSynchronizationBarrier(&b->impl, (LONG)count, -1) ? 0 : -1;
@@ -55,7 +51,7 @@ barrier_wait(Barrier *b)
 }
 
 static inline void 
-barrier_destroy(Barrier *b) 
+barrier_release(Barrier *b) 
 {
     DeleteSynchronizationBarrier(&b->impl);
 }
@@ -63,13 +59,13 @@ barrier_destroy(Barrier *b)
 #elif defined(__linux__)
 #include <pthread.h>
 
-typedef struct 
+struct Barrier
 { 
     pthread_Barrier impl;
-} Barrier;
+};
 
 static inline S32 
-barrier_init(Barrier *b, unsigned count) 
+barrier_create(Barrier *b, unsigned count) 
 {
     if (count == 0) return -1;
     return pthread_barrier_init(&b->impl, NULL, count) == 0 ? 0 : -1;
@@ -84,7 +80,7 @@ barrier_wait(Barrier *b)
 }
 
 static inline void 
-barrier_destroy(Barrier *b) 
+barrier_release(Barrier *b) 
 {
     pthread_barrier_destroy(&b->impl);
 }

@@ -1,12 +1,13 @@
 #ifndef LANE_H
 #define LANE_H
+
 #include "platform.h"
 #include "types.h"
-#include "arena.h"
-#define CPU_NUMBER 32
+#include "Arena.h"
 
+extern thread_local Context context;
 
-typedef struct
+struct Context
 {
     U64 id;
     U64 count;
@@ -15,19 +16,17 @@ typedef struct
     Barrier* barrier;
     
     Arena arena;
-} LaneContext;
+};
 
 
-typedef struct
+struct LaneRange
 {
     U64 min;
     U64 max;
-} LaneRange;
-
-extern thread_local LaneContext g_lane_context;
+};
 
 
-void set_lane_context(LaneContext lc);
+void context_create(U64 id, U64 count);
 
 U64 lane_count();
 U64 lane_idx();

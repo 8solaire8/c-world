@@ -13,7 +13,7 @@
 #include "defs.h"
 #include "arena.h"
 #include "audio.h"
-#include "wave.h"
+#include "wav.h"
 
 #pragma comment(lib, "ole32.lib")
 
@@ -118,7 +118,7 @@ play_sound(U32 id)
 // TODO: have it work if sound source changes
 // TODO: implementing of the pushing of audio
 bool
-audio_init() 
+audio_create() 
 {
     audio_event = CreateEvent(NULL, FALSE, FALSE, NULL);
     if(audio_event == NULL) return false;
@@ -181,7 +181,7 @@ audio_thread(LPVOID arg)
     
     if(!SUCCEEDED(hr))
     {
-        return false;
+        return 1;
     }
     
     F32 phase = 0;
@@ -225,11 +225,12 @@ audio_thread(LPVOID arg)
         hr = IAudioRenderClient_ReleaseBuffer(renderService, nFrames, 0);
     }
     
+    return 0;
 }
 
 
 void 
-start_audio_thread()
+audio_thread_start()
 {
     HANDLE thread = CreateThread(NULL,
                                  0,
@@ -242,7 +243,7 @@ start_audio_thread()
 }
 
 void
-audio_free()
+audio_release()
 {
     IAudioRenderClient_Release(renderService);
     

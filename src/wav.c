@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "wave.h"
+#include "wav.h"
 #include "types.h"
 
 

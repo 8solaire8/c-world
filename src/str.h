@@ -1,19 +1,18 @@
-#ifndef STRINGS_H_
-#define STRINGS_H_
+#ifndef STR_H
+#define STR_H
 
-#include "arena.h"
+#include "types.h"
 
-typedef struct 
+struct String8 
 {
     U8*   data;
     U64   size;
-} String8;
-
+};
 
 String8 string8_new(char* c);
-char* string8_to_char(Arena* arena, const String8* str);
+char* string8_to_char(Arena* arena, String8 str);
+S32 string8_compare(String8 str1, String8 str2);
 
-
-S32 compare_strings(const char* str1, const char* str2);
-
+U64 cstr_len(const char* c_str);
+bool is_ascii(char c);
 #endif

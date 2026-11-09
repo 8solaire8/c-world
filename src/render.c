@@ -48,11 +48,11 @@ typedef struct
 static U64     g_vertex_buffer_count = 0;
 static Vertex *g_vertex_buffer;
 
-static U64  g_index_buffer_count = 0;
+static U32  g_index_buffer_count = 0;
 static U16 *g_index_buffer;
 
 bool
-init_renderer(const Window* window) 
+renderer_create(const Window* window) 
 {
     DXGI_SWAP_CHAIN_DESC sd = {0};
     sd.BufferCount = 2;
@@ -143,13 +143,14 @@ frame_begin(Window* window)
 void 
 frame_end() 
 {
-    D3D11_MAPPED_SUBRESOURCE mapped;
+    D3D11_MAPPED_SUBRESOURCE mapped = {0};
     
     ID3D11DeviceContext_Unmap(ctx, (ID3D11Resource*)vb, 0);
     ID3D11DeviceContext_Unmap(ctx, (ID3D11Resource*)ib, 0);
     
     g_vertex_buffer = NULL;
     g_index_buffer  = NULL;
+    
     
     U32 stride = sizeof(Vertex);
     U32 offset = 0;
@@ -174,7 +175,7 @@ PushTryangle(U32 x, U32 y, U32 size)
 U32 
 screen_to_shader(U16 point)
 {
-    
+    return 0;
 }
 
 void 

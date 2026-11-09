@@ -15,5 +15,13 @@
 #define GIGABYTES(x) (MEGABYTES(x) * 1024ULL)
 #define PAGES(x) (PAGE_SIZE * x)
 
+#define UNUSED(x) ((void)(x))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
+#define CPU_NUMBER 32
 
 #endif

@@ -1,7 +1,3 @@
-#ifndef UNICODE
-#define UNICODE
-#endif 
-
 #include <windows.h>
 
 #include "platform.h"
@@ -9,22 +5,23 @@
 #include "audio.h"
 #include "arena.h"
 #include "defs.h"
+#include "lane.h"
 
 static Arena g_arena;
 
 #ifdef _WIN32
 int WINAPI 
-wWinMain(HINSTANCE instance, HINSTANCE h_instance, PWSTR cmd, int show)
+wWinMain(HINSTANCE instance, HINSTANCE h_instance, PWSTR cmd, S32 show) 
+
 #else
-int main(int argv, char* argc)
+int main(int argv, char* argc) 
 #endif
 {
+    UNUSED(h_instance);
+    UNUSED(cmd);
     
-    (void) h_instance;
-    (void) cmd;
-    
-    arena_alloc(&g_arena, GIGABYTES(4));
-    init_scratch();
+    arena_create(&g_arena, GIGABYTES(4));
+    context_create(0, 1);
     
     Window window = {0};
     
@@ -36,10 +33,10 @@ int main(int argv, char* argc)
     }
     // sound functions
     load_sounds(&g_arena);
-    if(!audio_init()) return 1;
-    start_audio_thread();
+    if(!audio_create()) return 1;
+    audio_thread_start();
     
-    init_renderer(&window);
+    renderer_create(&window);
     
     MSG msg = {0};
     while (GetMessage(&msg, NULL, 0, 0) > 0)
