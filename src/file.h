@@ -12,9 +12,9 @@ typedef struct
     U8* data;
 } File;
 
-File file_open(String8 name);
-void file_size(const File* name);
-void file_size_path(String8* name);
+File* file_load(Arena* a, String8 path);
+
+U64 file_get_size(String8 path);
 
 
 

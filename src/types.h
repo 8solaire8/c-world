@@ -4,9 +4,11 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <wchar.h>
 
 #define local_function static 
 
+typedef wchar_t       wchar;
 typedef void*         RawPtr;
 typedef float         F32;
 typedef double        F64;
@@ -19,12 +21,13 @@ typedef int16_t       S16;
 typedef int32_t       S32;
 typedef int64_t       S64;
 
-typedef struct Arena Arena;
+typedef struct Arena     Arena;
 typedef struct ArenaTemp ArenaTemp;
-typedef struct String8 String8;
-typedef struct Context Context;
+typedef struct String8   String8;
+typedef struct String16  String16;
+typedef struct Context   Context;
 typedef struct LaneRange LaneRange;
-typedef struct Window Window;
-typedef struct Barrier Barrier;
-typedef struct Colour Colour;
+typedef struct Window    Window;
+typedef struct Barrier   Barrier;
+typedef struct Colour    Colour;
 #endif

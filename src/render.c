@@ -34,7 +34,6 @@ static IDXGISwapChain *sc;
 static ID3D11VertexShader *vs;
 static ID3D11PixelShader *ps;
 
-
 static ID3D11Buffer *vb;
 static ID3D11Buffer *ib;
 
