@@ -5,7 +5,7 @@
 #include "arena.h"
 
 String8 
-string8_new(char* c_string) 
+str8(char* c_string) 
 {
     String8 res = {0};
     U64 size = cstr_len(c_string);
@@ -14,21 +14,31 @@ string8_new(char* c_string)
     return res;
 }
 
+internal String8
+str8_copy(Arena*a, String8 str)
+{
+    String8* res = push_struct(a, String8);
+    res->size = cstr_len(c_str);
+    res->data = arena_push_zero(a, res->size);
+    CopyMemory(res->data, c_str, res->size);
+    return res;
+}
+
 char*
-string8_to_char(Arena* arena, String8 str)
+str8_to_char(Arena* arena, String8 str)
 {
     char* res = push_array_zero(arena, char, str.size + 1);
     CopyMemory(res, str.data, str.size);
     return res;
 }
 wchar*
-string8_to_wchar(Arena* arena, String8 str)
+str8_to_wchar(Arena* arena, String8 str)
 {
     
 }
 
 S32 
-string8_compare(String8 a, String8 b) 
+str8_compare(String8 a, String8 b) 
 {
     U64 min_size = MIN(a.size, b.size);
     
@@ -44,7 +54,7 @@ string8_compare(String8 a, String8 b)
 
 
 wchar* 
-string16_to_wchar(Arena* arena, String16 str)
+str16_to_wchar(Arena* arena, String16 str)
 {
     wchar* res = push_array_zero(arena, wchar, str.size + 1);
     CopyMemory(res, str.data, str.size * sizeof(wchar));
@@ -52,7 +62,7 @@ string16_to_wchar(Arena* arena, String16 str)
 }
 
 String8
-string16_to_string8(Arena* arena, String16 src)
+str16_to_8(Arena* arena, String16 src)
 {
     ArenaTemp temp = get_scratch();
     String8 res = {0};
@@ -73,7 +83,7 @@ string16_to_string8(Arena* arena, String16 src)
 }
 
 String16
-string8_to_string16(Arena* arena, String8 src)
+str8_to_16(Arena* arena, String8 src)
 {
     String16 res = {0};
     
@@ -98,7 +108,7 @@ string8_to_string16(Arena* arena, String8 src)
 }
 
 char*
-string16_to_char(Arena* arena, String16 str)
+str16_to_char(Arena* arena, String16 str)
 {
     
 }

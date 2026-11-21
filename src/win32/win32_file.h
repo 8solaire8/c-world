@@ -1,10 +1,5 @@
-/* date = November 8th 2026 10:35 pm */
-
-#ifndef FILE_H
-#define FILE_H
-
-#include "types.h"
-#include "str.h"
+#ifndef WIN32_FILE_H
+#define WIN32_FILE_H
 
 typedef struct 
 {
@@ -16,6 +11,4 @@ File* file_load(Arena* a, String8 path);
 
 U64 file_get_size(String8 path);
 
-
-
-#endif //FILE_H
+#endif //WIN32_FILE_H

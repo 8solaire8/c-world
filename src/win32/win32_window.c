@@ -1,6 +1,3 @@
-#include "platform.h"
-
-
 void
 get_window_size(const Window* window, F32* width, F32* hight )
 {

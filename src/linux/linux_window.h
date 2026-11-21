@@ -1,0 +1,4 @@
+#ifndef LINUX_WINDOW_H
+#define LINUX_WINDOW_H
+
+#endif //LINUX_WINDOW_H

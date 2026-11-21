@@ -1,25 +1,30 @@
-#include <windows.h>
+#include "base/base_inc.h"
+#include "window/window.h"
 
-#include "platform.h"
-#include "render.h"
-#include "audio.h"
-#include "arena.h"
-#include "defs.h"
-#include "lane.h"
+#ifdef OS_WINDOWS
+#include "win32/win32_inc.h"
+#elif OS_LINUX
+#include "linux/linux_inc.h"
+#endif
+
+#include "base/base_inc.c"
+
+#ifdef OS_WINDOWS
+#include "win32/win32_inc.c"
+#elif OS_LINUX
+#include "linux/linux_inc.c"
+#endif
+
 
 static Arena g_arena;
 
-#ifdef _WIN32
+#ifdef OS_WINDOWS
 int WINAPI 
 wWinMain(HINSTANCE instance, HINSTANCE h_instance, PWSTR cmd, S32 show) 
-
 #else
 int main(int argv, char* argc) 
 #endif
 {
-    UNUSED(h_instance);
-    UNUSED(cmd);
-    
     arena_create(&g_arena, GIGABYTES(4));
     context_create(0, 1);
     

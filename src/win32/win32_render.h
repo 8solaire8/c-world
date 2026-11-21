@@ -1,9 +1,7 @@
-#ifndef RENDER_H
-#define RENDER_H
+#ifndef WIN32_RENDER_H
+#define WIN32_RENDER_H
 
-#include "platform.h"
-#include "types.h"
-
+typedef struct Colour Colour;
 struct Colour 
 {
     F32 r, g, b, a;
@@ -16,9 +14,8 @@ void renderer_release();
 
 void push_rect( F32 x, F32 y, F32 width, F32 hight, Colour colour);
 
-
 void frame_begin(Window* window);
 void frame_end();
 
-#endif
+#endif //WIN32_RENDER_H
 

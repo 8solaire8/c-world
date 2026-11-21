@@ -1,11 +1,15 @@
-#include "types.h"
-#include "defs.h"
-#include "lane.h"
-#include "arena.h"
-
 thread_local Context context;
-static Barrier barrier;
-static U64 shared_buffer;
+global Barrier barrier;
+global U64 shared_buffer;
+
+ArenaTemp 
+scratch_begin()
+{
+    ArenaTemp temp = {0};
+    temp.arena = &context.arena;
+    temp.pos = context.arena.ptr;
+    return temp;
+}
 
 void
 context_create(U64 id, U64 count)

@@ -1,8 +1,7 @@
 #ifndef ARENA_H
 #define ARENA_H
 
-#include "types.h"
-
+typedef struct Arena Arena;
 struct Arena
 {
     U8* data;
@@ -11,6 +10,7 @@ struct Arena
     U64 capacity;
 };
 
+typedef struct ArenaTemp ArenaTemp;
 struct ArenaTemp
 {
     Arena* arena;
@@ -23,7 +23,7 @@ void arena_release(Arena* a);
 
 RawPtr arena_push(Arena* a, U64 size);
 RawPtr arena_push_zero(Arena* a, U64 size);
-String8* arena_dmp_str(Arena* a, const char* c_str);
+
 
 #define push_array(arena, type, count)(type*) arena_push((arena), sizeof(type)*(count))
 #define push_array_zero(arena, type, count)(type*)arena_push_zero((arena), sizeof(type)*(count))
@@ -42,7 +42,7 @@ void arena_print(Arena* a);
 ArenaTemp arena_temp_begin(Arena* a);
 void arena_temp_end(ArenaTemp temp);
 
-ArenaTemp get_scratch();
-#define release_scratch(t) arena_temp_end(t)
+ArenaTemp scratch_begin();
+#define scratch_end(t) arena_temp_end(t)
 
 #endif

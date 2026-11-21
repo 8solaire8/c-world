@@ -186,8 +186,8 @@ EntryPoint(LPVOID parameter)
 }
 
 
-static UINT64 shared_buffer;
-static Barrier barrier;
+global UINT64 g_shared_buffer;
+global Barrier g_barrier;
 
 int 
 main(int argv, char* argc)
@@ -195,7 +195,7 @@ main(int argv, char* argc)
     DWORD count = GetActiveProcessorCount(ALL_PROCESSOR_GROUPS);
     
     
-    barrier_init(&barrier, CPU_NUMBER);
+    barrier_init(&g_barrier, CPU_NUMBER);
     
     HANDLE hThread[CPU_NUMBER];
     LaneContext ctx[CPU_NUMBER];

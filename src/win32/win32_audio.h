@@ -1,7 +1,5 @@
-#ifndef AUDIO_H
-#define AUDIO_H
-
-#include "types.h"
+#ifndef WIN32_AUDIO_H
+#define WIN32_AUDIO_H
 
 typedef struct 
 {
@@ -34,4 +32,4 @@ void audio_release();
 void audio_thread_start();
 
 
-#endif //AUDIO_H
+#endif //WIN32_AUDIO_H

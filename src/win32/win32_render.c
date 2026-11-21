@@ -22,6 +22,8 @@ static const char shader[] =
 "VSOut vs_main(VSIn i) { VSOut o; o.pos = float4(i.pos, 0, 1); o.col = i.col; return o; }\n"
 "float4 ps_main(VSOut i) : SV_TARGET { return i.col; }\n";
 
+
+
 static ID3D11DeviceContext *ctx;
 static ID3D11RenderTargetView *rtv;
 

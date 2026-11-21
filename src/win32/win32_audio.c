@@ -1,22 +1,8 @@
-#define COBJMACROS 
-#include <stdio.h>
-#include <Windows.h>
-#include <initguid.h>
-#include <Audioclient.h>
-#include <mmdeviceapi.h>
-#include <assert.h>
-#include <math.h>
 
 #include "stb_ds.h"
 
-#include "audio.h"
-#include "defs.h"
-#include "arena.h"
-#include "audio.h"
-#include "wav.h"
-
 #pragma comment(lib, "ole32.lib")
-
+#pragma comment(lib, "dxguid.lib")
 
 const CLSID CLSID_MMDeviceEnumerator = {0xBCDE0395, 0xE52F, 0x467C, {0x8E,0x3D,0xC4,0x57,0x92,0x91,0x69,0x2E}};
 const IID   IID_IMMDeviceEnumerator  = {0xA95664D2, 0x9614, 0x4F35, {0xA7,0x46,0xDE,0x8D,0xB6,0x36,0x17,0xE6}};
