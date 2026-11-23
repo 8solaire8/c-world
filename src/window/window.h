@@ -10,6 +10,5 @@ struct Window
 
 Window window_create(String8 name, U64 width, U64 height);
 void window_release(Window window);
-void window_start(Window window);
 
 #endif //WINDOW_MANAGER_H

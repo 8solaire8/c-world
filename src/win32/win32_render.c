@@ -1,12 +1,3 @@
-#define COBJMACROS
-#include <windows.h>
-#include <d3d11.h>
-#include <d3dcompiler.h>
-
-#include "platform.h"
-#include "defs.h"
-#include "render.h"
-#include "arena.h"
 
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "d3d11.lib")
@@ -53,8 +44,9 @@ static U32  g_index_buffer_count = 0;
 static U16 *g_index_buffer;
 
 bool
-renderer_create(const Window* window) 
+renderer_create(Window handle) 
 {
+    W32_Window* window = w32_window_from_handle(handle);
     DXGI_SWAP_CHAIN_DESC sd = {0};
     sd.BufferCount = 2;
     sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -107,10 +99,10 @@ renderer_create(const Window* window)
     return true;
 }
 
-static Window* g_window;
+static Window g_window;
 
 void 
-frame_begin(Window* window) 
+frame_begin(Window window) 
 {
     g_window = window;
     F32 width, height;

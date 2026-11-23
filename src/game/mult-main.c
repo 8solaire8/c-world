@@ -118,7 +118,7 @@ stereo_to_mono(F32* output, const F32* input, U64 frame_count)
 
 
 static U64 shared_buffer;
-static Barrier barrier;
+//static Barrier barrier;
 
 DWORD WINAPI 
 EntryPoint(LPVOID parameter)

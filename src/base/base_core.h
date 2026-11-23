@@ -19,9 +19,20 @@ typedef int16_t       S16;
 typedef int32_t       S32;
 typedef int64_t       S64;
 
+
+#if COMPILER_MSVC || (COMPILER_CLANG && OS_WINDOWS)
+# pragma section(".rdata$", read)
+# define read_only __declspec(allocate(".rdata$"))
+#elif (COMPILER_CLANG && OS_LINUX)
+# define read_only __attribute__((section(".rodata")))
+#else
+# define read_only
+#endif
+
+
 #define internal      static
 #define global        static
-#define local_persist static
+#define local         static
 
 #if COMPILER_MSVC
 # define thread_static __declspec(thread)
@@ -53,5 +64,6 @@ typedef int64_t       S64;
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
 
+internal void os_create_subsystem();
 
 #endif

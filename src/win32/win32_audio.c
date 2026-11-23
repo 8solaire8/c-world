@@ -1,6 +1,3 @@
-
-#include "stb_ds.h"
-
 #pragma comment(lib, "ole32.lib")
 #pragma comment(lib, "dxguid.lib")
 
@@ -61,10 +58,10 @@ int is_audio_file(const char *filename)
 void
 load_sounds(Arena* arena)
 {
-    ArenaTemp temp = get_scratch();
+    ArenaTemp temp = scratch_begin();
     
     WIN32_FIND_DATAA entry;
-    HANDLE find = FindFirstFileA("W:\\res\\sound\\*", &entry);
+    HANDLE find = FindFirstFileA("res\\sound\\*", &entry);
     
     assert(find != INVALID_HANDLE_VALUE);
     
@@ -81,7 +78,7 @@ load_sounds(Arena* arena)
             // open file and read it into sound
             Sound* s = &g_sounds[sound_idx++];
             s->id = sound_idx;
-            String8 str = string8_new(entry.cFileName);
+            String8 str = str8(entry.cFileName);
             s->size = wav_size(str);
             
             s->data = push_array(arena, F32, s->size);
@@ -91,7 +88,7 @@ load_sounds(Arena* arena)
     } while (FindNextFileA(find, &entry));
     FindClose(find);
     
-    release_scratch(temp);
+    scratch_end(temp);
 }
 
 void 

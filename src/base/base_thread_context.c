@@ -1,13 +1,13 @@
-thread_local Context context;
-global Barrier barrier;
+thread_static Context context;
+global Barrier g_barrier;
 global U64 shared_buffer;
 
 ArenaTemp 
 scratch_begin()
 {
     ArenaTemp temp = {0};
-    temp.arena = &context.arena;
-    temp.pos = context.arena.ptr;
+    temp.arena = context.arena;
+    temp.pos = context.arena->ptr;
     return temp;
 }
 
@@ -17,8 +17,8 @@ context_create(U64 id, U64 count)
     context.id = id;
     context.count = count;
     context.shared_buffer = &shared_buffer;
-    context.barrier = &barrier;
-    arena_create(&context.arena, GIGABYTES(4));
+    context.barrier = g_barrier;
+    context.arena = arena_create();
 }
 
 U64

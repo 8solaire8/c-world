@@ -1,6 +1,14 @@
-void
-get_window_size(const Window* window, F32* width, F32* hight )
+internal W32_Window*
+w32_window_from_handle(Window handle)
 {
+    W32_Window* window = (W32_Window*)handle.u64[0];
+    return window;
+}
+
+internal void
+get_window_size(Window handle, F32* width, F32* hight )
+{
+    W32_Window* window = w32_window_from_handle(handle);
     RECT rect;
     if ( GetWindowRect(window->hwnd, &rect) )
     {
@@ -23,31 +31,28 @@ WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-
-void
-create_window_win32(Window* window, HINSTANCE instance, int show)
+Window
+window_create(String8 name, U64 width, U64 hight)
 {
-    window->instance = instance;
-    window->show = show;
-}
-
-
-bool
-start_window(Window* window, const wchar_t* CLASS_NAME, U16 width, U16 hight)
-{
+    Window handle = {0};
+    handle.u64[0] = IntFromPtr((push_struct_zero(w32_state.arena, W32_Window)));
+    
+    W32_Window* window = w32_window_from_handle(handle);
+    window->instance = GetModuleHandle(NULL);
+    
     WNDCLASS wc = { 0 };
     
     wc.lpfnWndProc   = WindowProc;
     wc.hInstance     = window->instance;
-    wc.lpszClassName = CLASS_NAME;
+    wc.lpszClassName = L"FOR LATER";
     
     RegisterClass(&wc);
     
-    HWND hwnd = CreateWindowEx
+    window->hwnd = CreateWindowEx
     (
      0,                              // Optional window styles.
-     CLASS_NAME,                     // Window class
-     CLASS_NAME,
+     wc.lpszClassName,                     // Window class
+     wc.lpszClassName,
      WS_OVERLAPPEDWINDOW,            // Window style
      
      // Size and position
@@ -58,14 +63,7 @@ start_window(Window* window, const wchar_t* CLASS_NAME, U16 width, U16 hight)
      NULL        // Additional application data
      );
     
-    if (hwnd == NULL)
-    {
-        return false;
-    }
-    
-    window->hwnd = hwnd;
-    
-    ShowWindow(window->hwnd, window->show);
-    return true;
+    ShowWindow(window->hwnd, 1);
+    return handle;
 }
 

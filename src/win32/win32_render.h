@@ -8,13 +8,13 @@ struct Colour
 };
 
 
-bool renderer_create(const Window* window);
+bool renderer_create(Window window);
 void renderer_release();
 
 
 void push_rect( F32 x, F32 y, F32 width, F32 hight, Colour colour);
 
-void frame_begin(Window* window);
+void frame_begin(Window window);
 void frame_end();
 
 #endif //WIN32_RENDER_H

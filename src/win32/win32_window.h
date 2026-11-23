@@ -6,15 +6,8 @@ struct W32_Window
 {
     HWND hwnd;
     HINSTANCE instance;
-    S32 show;
 };
 
-void w32_create_window(Window* window, HINSTANCE instance, int show);
 
-void w32_get_window_size(const Window* window, F32* width, F32* height);
-
-bool w32_start_window(W32_Window* w32_window, String8 name, U64 width, U64 hight);
-
-
-
+internal W32_Window* w32_window_from_handle(Window handle);
 #endif // WIN32_WINDOW_H

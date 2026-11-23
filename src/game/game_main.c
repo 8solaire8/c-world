@@ -1,5 +1,6 @@
 #include "base/base_inc.h"
-#include "window/window.h"
+#include "window/window_inc.h"
+#include "audio/audio_inc.h"
 
 #ifdef OS_WINDOWS
 #include "win32/win32_inc.h"
@@ -8,6 +9,9 @@
 #endif
 
 #include "base/base_inc.c"
+#include "window/window_inc.c"
+#include "audio/audio_inc.c"
+
 
 #ifdef OS_WINDOWS
 #include "win32/win32_inc.c"
@@ -16,32 +20,30 @@
 #endif
 
 
-static Arena g_arena;
+static Arena *g_arena;
 
 #ifdef OS_WINDOWS
 int WINAPI 
 wWinMain(HINSTANCE instance, HINSTANCE h_instance, PWSTR cmd, S32 show) 
-#else
+#elif OS_LINUX
 int main(int argv, char* argc) 
 #endif
 {
-    arena_create(&g_arena, GIGABYTES(4));
+    os_create_subsystem();
+    
+    g_arena = arena_create();
     context_create(0, 1);
     
-    Window window = {0};
+    String8 name = str8("The Adventures of Drosten");
     
-    create_window_win32(&window, instance, show);
+    Window window = window_create(name, 1920, 1080);
     
-    if(!start_window(&window, L"The Adventures of Drosten", 800, 400)) 
-    {
-        return 1;
-    }
     // sound functions
-    load_sounds(&g_arena);
+    load_sounds(g_arena);
     if(!audio_create()) return 1;
     audio_thread_start();
     
-    renderer_create(&window);
+    renderer_create(window);
     
     MSG msg = {0};
     while (GetMessage(&msg, NULL, 0, 0) > 0)
@@ -49,7 +51,7 @@ int main(int argv, char* argc)
         TranslateMessage(&msg);
         DispatchMessage(&msg);
         
-        frame_begin(&window);
+        frame_begin(window);
         
         push_rect(100, 50, 30, 30, (Colour){1.0f,0.0f,0.0f,1.0f});
         

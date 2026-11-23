@@ -4,10 +4,12 @@
 typedef struct Arena Arena;
 struct Arena
 {
-    U8* data;
+    
     U64 ptr;
     U64 size;
     U64 capacity;
+    U8* data;
+    U64 base_pos;
 };
 
 typedef struct ArenaTemp ArenaTemp;
@@ -17,12 +19,12 @@ struct ArenaTemp
     U64 pos;
 };
 
+internal Arena *arena_create();
+internal Arena *arena_create_sized(U64 capacity);
+internal void arena_release(Arena* a);
 
-void arena_create(Arena* a, U64 capacity);
-void arena_release(Arena* a);
-
-RawPtr arena_push(Arena* a, U64 size);
-RawPtr arena_push_zero(Arena* a, U64 size);
+internal RawPtr arena_push(Arena* a, U64 size);
+internal RawPtr arena_push_zero(Arena* a, U64 size);
 
 
 #define push_array(arena, type, count)(type*) arena_push((arena), sizeof(type)*(count))
@@ -30,19 +32,17 @@ RawPtr arena_push_zero(Arena* a, U64 size);
 #define push_struct(arena, type) push_array((arena), type, 1)
 #define push_struct_zero(arena, type) push_array_zero((arena), type, 1)
 
-void arena_pop(Arena* a, U64 size);
-U64 arena_get_pos(Arena* a);
+internal void arena_pop(Arena* a, U64 size);
+internal U64 arena_get_pos(Arena* a);
 
-void arena_set_pos(Arena* a, U64 pos);
-void arena_clear(Arena* a);
+internal void arena_set_pos(Arena* a, U64 pos);
+internal void arena_clear(Arena* a);
 
-void arena_print(Arena* a);
+internal void arena_print(Arena* a);
 
 
-ArenaTemp arena_temp_begin(Arena* a);
-void arena_temp_end(ArenaTemp temp);
+internal ArenaTemp arena_temp_begin(Arena* a);
+internal void arena_temp_end(ArenaTemp temp);
 
-ArenaTemp scratch_begin();
-#define scratch_end(t) arena_temp_end(t)
 
 #endif

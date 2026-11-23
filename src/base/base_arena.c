@@ -19,12 +19,32 @@ required_pages(U64 memory_size)
 }
 
 
-internal void 
-arena_create(Arena* a, U64 capacity)
+internal Arena*
+arena_create()
+{
+    return arena_create_sized(MEGABYTES(64));
+}
+
+internal Arena*
+arena_create_sized(U64 capacity)
 {
     assert(capacity % PAGE_SIZE == 0);
-    a->capacity = capacity;
-    a->data = pages_reserve(a->capacity);
+    
+    RawPtr data = pages_reserve(capacity);
+    
+    U64 required_size = sizeof(Arena) + 1;
+    U64 size_to_commit = round_up_to_page(required_size);
+    RawPtr res = pages_commit(data, 0, size_to_commit);
+    assert(res);
+    
+    Arena *arena = (Arena*)data;
+    arena->size += size_to_commit;
+    arena->base_pos = size_to_commit;
+    arena->capacity = capacity;
+    
+    arena->ptr = arena->base_pos;
+    arena->data = data;
+    return arena;
 }
 
 internal void 
@@ -87,7 +107,7 @@ arena_set_pos(Arena* a, U64 pos)
 void 
 arena_clear(Arena* a) 
 {
-    a->ptr = 0;
+    a->ptr = a->base_pos;
 }
 
 void 

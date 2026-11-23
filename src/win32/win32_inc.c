@@ -1,5 +1,6 @@
 #include "win32_base.c"
+#include "win32_threads.c"
 #include "win32_audio.c"
 #include "win32_file.c"
-#include "win32_platform.c"
+#include "win32_window.c"
 #include "win32_render.c"

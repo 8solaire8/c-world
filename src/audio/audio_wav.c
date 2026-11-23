@@ -1,25 +1,18 @@
-#include <string.h>
-#include <stdio.h>
-
-#include "wav.h"
-#include "types.h"
-
-
-local_function void 
+internal void 
 write_u16(FILE* f, U16 v) 
 {
     fputc(v & 0xFF, f);
     fputc((v >> 8) & 0xFF, f);
 }
 
-local_function void 
+internal void 
 write_u32(FILE* f, U32 v) 
 {
     for (U32 i = 0; i < 4; i++)
         fputc((v >> (8 * i)) & 0xFF, f);
 }
 
-U32
+internal U32
 write_wav_f32(const char* filename, const F32* samples, U32 count, U32 sample_rate)
 {
     if (!filename || (!samples && count) ||
@@ -72,20 +65,20 @@ write_wav_f32(const char* filename, const F32* samples, U32 count, U32 sample_ra
 }
 
 
-U32
+internal U32
 read_wave_file(const char* filename, F32* buffer)
 {
     FILE* f = fopen(filename, "wb");
     return 1;
 }
 
-U64
+internal U64
 wav_size(String8 file_name)
 {
     return 0;
 }
 
-void 
+internal void 
 wav_load(F32* output, String8 file_name)
 {
     
