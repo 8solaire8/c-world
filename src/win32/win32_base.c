@@ -7,7 +7,7 @@ pages_reserve(U64 size)
 internal void 
 pages_release(void* ptr, U64 size)
 {
-    VirtualFree(ptr, size, MEM_RELEASE);
+    VirtualFree(ptr, 0, MEM_RELEASE);
 }
 
 internal void*

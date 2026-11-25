@@ -34,7 +34,7 @@ int main(int argv, char* argc)
     g_arena = arena_create();
     context_create(0, 1);
     
-    String8 name = str8("The Adventures of Drosten");
+    String8 name = str8_cstring("The Adventures of Drosten");
     
     Window window = window_create(name, 1920, 1080);
     

@@ -72,10 +72,10 @@ arena_push(Arena* a, U64 size_of_new)
 }
 
 internal RawPtr
-arena_push_zero(Arena* a, U64 size_of_new)
+arena_push_set(Arena* a, U64 size, U8 set_val)
 {
-    RawPtr p = arena_push(a, size_of_new);
-    ZeroMemory(p, size_of_new);
+    RawPtr p = arena_push(a, size);
+    memset(p, set_val ,size);
     return p;
 }
 

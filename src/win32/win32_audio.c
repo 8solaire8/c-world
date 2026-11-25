@@ -39,11 +39,11 @@ gen_sign_wave_buff(F32 frequency,
             samples[i * channels + c] = sample;
         }
         
-        *phase += ((F32)M_TAU * frequency) / samples_per_second;
+        *phase += ((F32)tau32 * frequency) / samples_per_second;
         
-        if (*phase >= M_TAU) 
+        if (*phase >= tau32) 
         {
-            *phase -= (F32)M_TAU;
+            *phase -= (F32)tau32;
         }
     }
 }
@@ -78,7 +78,7 @@ load_sounds(Arena* arena)
             // open file and read it into sound
             Sound* s = &g_sounds[sound_idx++];
             s->id = sound_idx;
-            String8 str = str8(entry.cFileName);
+            String8 str = str8_cstring(entry.cFileName);
             s->size = wav_size(str);
             
             s->data = push_array(arena, F32, s->size);

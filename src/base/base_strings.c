@@ -145,6 +145,13 @@ str8(U8 *str, U64 size)
     return result;
 }
 
+internal String8
+str8_range(U8 *first, U8 *one_past_last)
+{
+    String8 result = {first, (U64)(one_past_last - first)};
+    return result;
+}
+
 internal String8 
 str8_zero()
 {
@@ -155,30 +162,34 @@ internal String8
 str8_cstring(char* c_string) 
 {
     String8 res = {0};
-    U64 size = cstr_len(c_string);
+    res.size = cstr8_len(c_string);
     res.data = c_string;
-    res.size = size;
     return res;
 }
 
 internal String8
 str8_copy(Arena*a, String8 str)
 {
-    
+    String8 res = {0};
+    res.data = push_array(a, U8, str.size);
+    memcpy(res.data, str.data, str.size);
+    return res;
 }
 
 internal char*
 str8_to_char(Arena* arena, String8 str)
 {
     char* res = push_array_zero(arena, char, str.size + 1);
-    CopyMemory(res, str.data, str.size);
+    memcpy(res, str.data, str.size);
     return res;
 }
 
-internal wchar*
-str8_to_wchar(Arena* arena, String8 str)
+internal wchar *
+str8_to_wchar(Arena *arena, String8 s8)
 {
-    assert(1);
+    String16 s16 = str8_to_16(arena, s8);
+    wchar * res = str16_to_wchar(arena, s16);
+    return res;
 }
 
 internal S32 
@@ -197,60 +208,14 @@ str8_compare(String8 a, String8 b)
 }
 
 internal String16
-str16(U16 *str, U64 size)
-{
-    String16 result = {str, size};
-    return result;
-}
-
-internal String16
-str16_zero(void)
-{
-    String16 result = {0};
-    return result;
-}
-
-internal wchar* 
-str16_to_wchar(Arena* arena, String16 str)
-{
-    wchar* res = push_array_zero(arena, wchar, str.size + 1);
-    CopyMemory(res, str.data, str.size * sizeof(wchar));
-    return res;
-}
-
-internal String8
-str8_from_16(Arena *arena, String16 in)
-{
-    String8 result = str8_zero();
-    if(in.size)
-    {
-        U64 cap = in.size*3;
-        U8 *str = push_array_no_zero(arena, U8, cap + 1);
-        U16 *ptr = in.str;
-        U16 *opl = ptr + in.size;
-        U64 size = 0;
-        UnicodeDecode consume;
-        for(;ptr < opl; ptr += consume.inc)
-        {
-            consume = utf16_decode(ptr, opl - ptr);
-            size += utf8_encode(str + size, consume.codepoint);
-        }
-        str[size] = 0;
-        arena_pop(arena, (cap - size));
-        result = str8(str, size);
-    }
-    return result;
-}
-
-internal String16
-str16_from_8(Arena *arena, String8 in)
+str8_to_16(Arena *arena, String8 in)
 {
     String16 result = str16_zero();
     if(in.size)
     {
         U64 cap = in.size*2;
         U16 *str = push_array_no_zero(arena, U16, cap + 1);
-        U8 *ptr = in.str;
+        U8 *ptr = in.data;
         U8 *opl = ptr + in.size;
         U64 size = 0;
         UnicodeDecode consume;
@@ -266,15 +231,91 @@ str16_from_8(Arena *arena, String8 in)
     return result;
 }
 
-internal char*
-str16_to_char(Arena* arena, String16 str)
+
+internal String16
+str16(U16 *str, U64 size)
 {
-    
+    String16 result = {str, size};
+    return result;
+}
+
+internal String16
+str16_range(U16 *first, U16 *one_past_last)
+{
+    String16 result = {first, (U64)(one_past_last - first)};
+    return result;
+}
+
+internal String16
+str16_zero(void)
+{
+    String16 result = {0};
+    return result;
+}
+
+internal String16
+str16_cstring(wchar* c_str)
+{
+    String16 result = {0};
+    result.data = c_str;
+    result.size = cstr16_len(c_str);
+    return result;
+}
+
+internal wchar* 
+str16_to_wchar(Arena* arena, String16 str)
+{
+    wchar* res = push_array_zero(arena, wchar, str.size + 1);
+    CopyMemory(res, str.data, str.size * sizeof(wchar));
+    return res;
+}
+
+internal String8
+str16_to_8(Arena *arena, String16 in)
+{
+    String8 result = str8_zero();
+    if(in.size)
+    {
+        U64 cap = in.size*3;
+        U8 *str = push_array_no_zero(arena, U8, cap + 1);
+        U16 *ptr = in.data;
+        U16 *opl = ptr + in.size;
+        U64 size = 0;
+        UnicodeDecode consume;
+        for(;ptr < opl; ptr += consume.inc)
+        {
+            consume = utf16_decode(ptr, opl - ptr);
+            size += utf8_encode(str + size, consume.codepoint);
+        }
+        str[size] = 0;
+        arena_pop(arena, (cap - size));
+        result = str8(str, size);
+    }
+    return result;
+}
+
+internal char*
+str16_to_char(Arena* arena, String16 s16)
+{
+    String8 s8 = str16_to_8(arena, s16);
+    char *c_str = str8_to_char(arena, s8);
+    return c_str;
 }
 
 
 internal U64 
-cstr8_len(U8* c_str)
+cstr8_len(U8 *c_str)
+{
+    U64 length = 0;
+    while(c_str[length] != '\0')
+    {
+        length++;
+    }
+    return length;
+}
+
+internal U64
+cstr16_len(U16 *c_str)
 {
     U64 length = 0;
     while(c_str[length] != '\0')
@@ -287,5 +328,5 @@ cstr8_len(U8* c_str)
 internal bool 
 is_ascii(char c)
 {
-    return c>= 0x20 && c <= 0x7E;
+    return c >= 0x20 && c <= 0x7E;
 }
